@@ -23,15 +23,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
   if (code) {
     const promoter = await prisma.promoter.findUnique({ where: { code } });
-    await prisma.outboundClick.create({
-      data: {
-        promoterId: promoter?.id,
-        code,
-        platform: target.db,
-        ipHash: hashIp(request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip")),
-        userAgent: request.headers.get("user-agent")?.slice(0, 220) || null,
-      },
-    });
+
+    if (promoter?.active) {
+      await prisma.outboundClick.create({
+        data: {
+          promoterId: promoter.id,
+          code: promoter.code,
+          platform: target.db,
+          ipHash: hashIp(request.headers.get("x-forwarded-for")?.split(",")[0] || request.headers.get("x-real-ip")),
+          userAgent: request.headers.get("user-agent")?.slice(0, 220) || null,
+        },
+      });
+    }
   }
 
   return NextResponse.redirect(target.url, 302);
