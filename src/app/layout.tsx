@@ -25,7 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <Link href="/promoters/apply">Apply</Link>
               <Link href="/promoters/posts">Submit post</Link>
               <Link href="/status">Status</Link>
-              <Link href="/withdraw">Withdraw</Link>
+              <Link href="/withdraw">Payouts</Link>
               <Link href="/admin">Admin</Link>
             </nav>
           </header>

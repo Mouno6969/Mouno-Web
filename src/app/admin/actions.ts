@@ -19,6 +19,9 @@ export async function updateRewardPool(formData: FormData) {
     amount: cleanText(formData.get("amount"), 80),
     description: cleanText(formData.get("description"), 500),
     active: formData.get("active") === "on",
+    pointsToSolRate: cleanText(formData.get("pointsToSolRate"), 120) || null,
+    minimumWithdrawal: cleanText(formData.get("minimumWithdrawal"), 80) || null,
+    paymentCycle: cleanText(formData.get("paymentCycle"), 40) || null,
     campaignStartAt: parseOptionalDate(formData.get("campaignStartAt")),
     campaignEndAt: parseOptionalDate(formData.get("campaignEndAt")),
   };
@@ -30,6 +33,7 @@ export async function updateRewardPool(formData: FormData) {
   });
   revalidatePath("/");
   revalidatePath("/admin");
+  revalidatePath("/status");
 }
 
 export async function createPromoter(formData: FormData) {

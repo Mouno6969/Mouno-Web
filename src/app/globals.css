@@ -95,6 +95,7 @@ p { color: var(--muted); line-height: 1.65; }
 .metric { position: relative; padding: 20px; border-radius: 22px; background: rgba(255,255,255,.045); border: 1px solid var(--line); margin-top: 16px; }
 .metric span { display:block; color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: .12em; }
 .metric strong { display:block; margin-top: 10px; font-size: clamp(28px, 4vw, 42px); letter-spacing: -0.04em; }
+.compactMetric strong { font-size: clamp(21px, 2.6vw, 28px); line-height: 1.12; }
 .ctaRow { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
 .button {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -249,6 +250,45 @@ p { color: var(--muted); line-height: 1.65; }
 .rewardBanner h2 { margin-top: 10px; max-width: 640px; }
 .rewardBanner p { margin-bottom: 0; max-width: 680px; color:#e9d5ff; }
 .bannerActions { display:flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.leaderboardPreview { padding-bottom: 18px; }
+.leaderboardPanel {
+  min-height: 100%;
+  border-color: rgba(192, 132, 252, .32);
+  background:
+    radial-gradient(circle at 92% 8%, rgba(20, 241, 201, .12), transparent 12rem),
+    linear-gradient(180deg, rgba(20, 28, 56, .82), rgba(9, 13, 29, .86));
+}
+.leaderboardPanel h2 { margin-top: 18px; }
+.leaderboardTabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 18px 0 6px; }
+.leaderboardTab { padding: 9px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--soft); background: rgba(255,255,255,.045); font-size: 13px; }
+.leaderboardTab.active { border-color: rgba(20, 241, 201, .55); color: #b8fff1; background: rgba(20, 241, 201, .1); }
+.compactPanel { padding: 16px; }
+.leaderboardRows { display: grid; gap: 10px; }
+.leaderboardRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 19px;
+  background: rgba(255,255,255,.045);
+}
+.leaderboardRank {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #f5f3ff;
+  background: linear-gradient(135deg, rgba(155, 92, 255, .72), rgba(20, 241, 201, .28));
+}
+.leaderboardIdentity, .leaderboardPoints { display: grid; gap: 4px; min-width: 0; }
+.leaderboardIdentity b, .leaderboardPoints strong { color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.leaderboardIdentity span, .leaderboardPoints span { color: var(--muted); font-size: 13px; }
+.leaderboardPoints { text-align: right; }
+.emptyLeaderboard { min-height: 208px; display: grid; place-content: center; gap: 12px; text-align: center; }
+.emptyLeaderboard p { margin: 0; }
 .learnCue { display:grid; place-items:center; gap: 7px; padding: 34px 0 8px; color:#d8b4fe; font-size: 13px; text-transform: uppercase; letter-spacing:.18em; }
 .learnCue b { width: 34px; height: 34px; border-radius: 999px; display:grid; place-items:center; border: 1px solid rgba(216, 180, 254, .4); background: rgba(155, 92, 255, .14); font-size: 22px; line-height: 1; }
 .infoSection { align-items: stretch; }
@@ -324,5 +364,9 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
   .promoHero h1 { font-size: clamp(40px, 12vw, 60px); letter-spacing: -0.06em; }
   .heroActions .button, .heroActions .ghostButton, .bannerActions .button { width: 100%; }
   .promoAdCard, .rewardBanner, .card, .panel { border-radius: 24px; }
+  .leaderboardTabs { gap: 7px; }
+  .leaderboardTab { flex: 1 1 calc(50% - 7px); text-align: center; padding-inline: 8px; }
+  .leaderboardRow { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .leaderboardPoints { grid-column: 2; text-align: left; }
   .orbWrap { width: min(72vw, 224px); margin-top: 24px; }
 }

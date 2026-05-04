@@ -45,6 +45,10 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
   const campaignWindow = rewardPool?.campaignStartAt || rewardPool?.campaignEndAt
     ? `${rewardPool.campaignStartAt ? formatDate(rewardPool.campaignStartAt) : "Open start"} → ${rewardPool.campaignEndAt ? formatDate(rewardPool.campaignEndAt) : "Open end"}`
     : "No campaign dates set.";
+  const rewardStatus = rewardPool?.active ? "Active" : "Inactive";
+  const pointsToSolRate = rewardPool?.pointsToSolRate || "Inactive / not announced yet";
+  const minimumWithdrawal = rewardPool?.minimumWithdrawal || "Inactive / not announced yet";
+  const paymentCycle = rewardPool?.paymentCycle || "Manual / not active yet";
 
   return (
     <main>
@@ -73,15 +77,21 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
         <div className="panel">
           <h2>Reward pool</h2>
           <form className="form" action={updateRewardPool}>
-            <label className="field">Display amount <input name="amount" defaultValue={rewardPool?.amount || ""} placeholder="Example: 50 SOL" /></label>
-            <label className="field">Description <textarea name="description" defaultValue={rewardPool?.description || ""} placeholder="Twitter/X reward terms or campaign status" /></label>
+            <label className="field">Display amount <input name="amount" defaultValue={rewardPool?.amount || ""} placeholder="Inactive until configured, e.g. 50 SOL" /></label>
+            <label className="field">Description <textarea name="description" defaultValue={rewardPool?.description || ""} placeholder="Unofficial/admin-reviewed reward terms or inactive campaign status" /></label>
+            <div className="formRow">
+              <label className="field">Points-to-SOL conversion rate <input name="pointsToSolRate" defaultValue={rewardPool?.pointsToSolRate || ""} placeholder="Inactive / not announced yet, e.g. 100 points = 0.05 SOL" /></label>
+              <label className="field">Minimum withdrawal <input name="minimumWithdrawal" defaultValue={rewardPool?.minimumWithdrawal || ""} placeholder="Inactive / not announced yet, e.g. 0.05 SOL" /></label>
+            </div>
+            <label className="field">Payment cycle <input name="paymentCycle" defaultValue={rewardPool?.paymentCycle || ""} placeholder="Manual / not active yet, or Weekly/Daily when configured" /></label>
             <div className="formRow">
               <label className="field">Campaign start <input name="campaignStartAt" type="datetime-local" defaultValue={formatDateInput(rewardPool?.campaignStartAt)} /></label>
               <label className="field">Campaign end <input name="campaignEndAt" type="datetime-local" defaultValue={formatDateInput(rewardPool?.campaignEndAt)} /></label>
             </div>
-            <label className="field"><span><input type="checkbox" name="active" defaultChecked={Boolean(rewardPool?.active)} /> Active and visible on homepage</span></label>
+            <label className="field"><span><input type="checkbox" name="active" defaultChecked={Boolean(rewardPool?.active)} /> Reward pool active</span></label>
             <button className="button" type="submit">Update reward pool</button>
           </form>
+          <p className="notice">Admins can update active/inactive status, conversion rate, minimum withdrawal, and payment cycle here at any time. Saved terms immediately revalidate public reward pages.</p>
           <p className="notice">Campaign window: {campaignWindow}</p>
         </div>
         <div className="panel">
@@ -112,8 +122,14 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           </form>
         </div>
         <div className="panel">
-          <h2>Current reward status</h2>
-          <p>{rewardPool?.active && rewardPool.amount ? `${rewardPool.amount}: ${rewardPool.description || "Active"}` : "Reward pool is not active."}</p>
+          <h2>Reward transparency</h2>
+          <div className="grid2">
+            <div className="metric"><span>Reward pool status</span><strong>{rewardStatus}</strong><p>{rewardPool?.amount || "No amount announced"}</p></div>
+            <div className="metric"><span>Points → SOL rate</span><strong>{pointsToSolRate}</strong></div>
+            <div className="metric"><span>Minimum withdrawal</span><strong>{minimumWithdrawal}</strong></div>
+            <div className="metric"><span>Payment cycle</span><strong>{paymentCycle}</strong></div>
+          </div>
+          <p className="notice">Example fixed rate only: 100 points = 0.05 SOL. Public pages treat this as an example unless admins save it as the configured conversion rate.</p>
           <p>Campaign window: {campaignWindow}</p>
           <p>Last updated: {rewardPool ? formatDate(rewardPool.updatedAt) : "Not seeded"}</p>
         </div>
