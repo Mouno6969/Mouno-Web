@@ -36,11 +36,13 @@ model Promoter {
 }
 
 model RewardPool {
-  id          Int      @id @default(1)
-  amount      String   @default("")
-  description String   @default("")
-  active      Boolean  @default(false)
-  updatedAt   DateTime @updatedAt
+  id              Int       @id @default(1)
+  amount          String    @default("")
+  description     String    @default("")
+  active          Boolean   @default(false)
+  campaignStartAt DateTime?
+  campaignEndAt   DateTime?
+  updatedAt       DateTime  @updatedAt
 }
 
 model PromoterPost {
@@ -86,6 +88,7 @@ model WithdrawalRequest {
   solWallet       String
   requestedAmount String
   status          WithdrawalStatus @default(PENDING)
+  payoutTxHash    String?
   message         String?
   adminNote       String?
   createdAt       DateTime         @default(now())

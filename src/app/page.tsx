@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { promoterQuality, site, socialLinks } from "@/lib/constants";
 import { pointRules } from "@/lib/twitter";
+import { formatDate } from "@/lib/format";
 
 export default async function Home() {
   const rewardPool = await prisma.rewardPool.findUnique({ where: { id: 1 } });
@@ -9,6 +10,9 @@ export default async function Home() {
   const poolDescription = rewardPool?.active
     ? rewardPool.description || "Active promoter rewards are reviewed by admin before payout."
     : "The reward pool can be activated or adjusted from the admin dashboard when a campaign is ready.";
+  const campaignWindow = rewardPool?.campaignStartAt || rewardPool?.campaignEndAt
+    ? `${rewardPool.campaignStartAt ? formatDate(rewardPool.campaignStartAt) : "Open start"} → ${rewardPool.campaignEndAt ? formatDate(rewardPool.campaignEndAt) : "Open end"}`
+    : "";
 
   return (
     <main className="homePage">
@@ -30,13 +34,14 @@ export default async function Home() {
               <span className="orbCore">+pts</span>
             </div>
           </div>
-          <h1 id="promo-title"><span className="headlinePlain">Promote RefundYourSOL</span><span>Earn reviewed rewards</span></h1>
+          <h1 id="promo-title"><span className="headlinePlain">Promote RefundYourSOL on X.</span><span>Submit hashtag posts.</span></h1>
           <p className="lede heroCopy">
-            Apply with your X profile, submit posts containing <strong>#RefundYourSol</strong> or <strong>#RYS</strong>, and earn points from reviewed engagement evidence.
+            Earn reviewed SOL rewards from admin-approved posts containing <strong>#RefundYourSol</strong> or <strong>#RYS</strong>.
           </p>
           <div className="ctaRow heroActions">
             <Link className="button glowButton" href="/promoters/apply">Apply as promoter</Link>
             <Link className="button dark" href="/promoters/posts">Submit X post</Link>
+            <Link className="ghostButton" href="/status">Check status</Link>
             <Link className="ghostButton" href="/withdraw">Request withdrawal</Link>
           </div>
         </div>
@@ -46,8 +51,9 @@ export default async function Home() {
             <span>Promoter pool</span>
             <strong>{poolLabel}</strong>
             <p>{poolDescription}</p>
+            {campaignWindow ? <p>Campaign: {campaignWindow}</p> : null}
           </div>
-          <Link href="/promoters/posts">Submit evidence</Link>
+          <Link href="/status">Check status</Link>
         </aside>
       </section>
 
@@ -73,11 +79,12 @@ export default async function Home() {
         <div>
           <span>Twitter/X promoter rewards</span>
           <h2>Turn campaign posts into reviewed point totals.</h2>
-          <p>Use the public forms to join, submit eligible X post URLs, and request withdrawal after admin approval.</p>
+          <p>Use the public forms to join, submit eligible X post URLs, check status by X handle plus wallet, and request withdrawal after admin approval.</p>
         </div>
         <div className="bannerActions">
           <Link className="button purple" href="/promoters/apply">Start application</Link>
           <Link className="button dark" href="/promoters/posts">Add post</Link>
+          <Link className="ghostButton" href="/status">Check status</Link>
         </div>
       </section>
 
