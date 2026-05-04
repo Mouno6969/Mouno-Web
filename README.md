@@ -36,10 +36,12 @@ These are general community links, not referral-code links:
   - Repost = 3 points
   - At most two comments from the same Twitter/X user count per post.
 - Rewards and withdrawals are manually approved by admin and paid outside the app.
+- Reward transparency is managed from the website admin dashboard, including active/inactive status, points-to-SOL conversion rate, minimum withdrawal, and payment cycle. Nullable fields stay inactive-safe until configured.
+- Admins can show fixed-rate examples such as `100 points = 0.05 SOL`, but examples are not live reward terms unless saved as configured terms and the reward pool is activated.
 - Promoters can check `/status` with their X handle/profile plus a SOL wallet from their profile or withdrawal request. Failed lookup responses are generic and do not reveal whether a handle exists.
 - Admins can export promoter, post, and withdrawal CSVs from protected `/admin/export/...` endpoints.
 - Withdrawal records can store a payout transaction hash for internal tracking and public proof of payment on matched status lookups.
-- Reward pools can include nullable campaign start/end dates displayed on the homepage when present.
+- Reward pools can include nullable campaign start/end dates plus nullable reward transparency terms displayed on the homepage and status page when present.
 - Admin notes are internal-only: they are visible/editable in the admin dashboard and admin CSV exports, but are not exposed on the public status page.
 
 ## Free/manual X verification limitation
@@ -59,7 +61,7 @@ A future authorized X API integration can populate the same `PromoterPost` and `
 Prisma models are defined in `prisma/schema.prisma`.
 
 - `Promoter`: display name, unique X profile URL, optional handle, follower count, automatic/manual verified flag, optional SOL wallet, active flag.
-- `RewardPool`: singleton record (`id = 1`) with display amount, description, active flag, optional campaign start/end dates, and update timestamp.
+- `RewardPool`: singleton record (`id = 1`) with display amount, description, active flag, optional points-to-SOL conversion rate, optional minimum withdrawal, optional payment cycle, optional campaign start/end dates, and update timestamp.
 - `PromoterPost`: submitted X post URL, optional text/evidence, hashtag status, review status (`PENDING`, `VERIFIED`, `REJECTED`), engagement counts, calculated points, admin note.
 - `PostCommentEngagement`: per-post commenter handle and comment count. `eligibleCount` is capped at `min(commentCount, 2)`.
 - `WithdrawalRequest`: promoter-linked SOL wallet request with amount, message, status (`PENDING`, `APPROVED`, `REJECTED`, `PAID`), optional payout transaction hash, and internal admin note.

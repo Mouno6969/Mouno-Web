@@ -27,7 +27,14 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
   const xIdentifier = cleanText(queryValue(query.xIdentifier), 180);
   const solWallet = cleanText(queryValue(query.solWallet), 120);
   const searched = Boolean(xIdentifier || solWallet);
-  const promoter = await loadPromoterStatus(xIdentifier, solWallet);
+  const [promoter, rewardPool] = await Promise.all([
+    loadPromoterStatus(xIdentifier, solWallet),
+    prisma.rewardPool.findUnique({ where: { id: 1 } }),
+  ]);
+  const rewardStatus = rewardPool?.active ? "Active" : "Inactive";
+  const pointsToSolRate = rewardPool?.pointsToSolRate || "Inactive / not announced yet";
+  const minimumWithdrawal = rewardPool?.minimumWithdrawal || "Inactive / not announced yet";
+  const paymentCycle = rewardPool?.paymentCycle || "Manual / not active yet";
 
   const posts = promoter?.posts || [];
   const withdrawals = promoter?.withdrawalRequests || [];
@@ -59,6 +66,17 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
             <button className="button" type="submit">Check status</button>
           </form>
           <p><Link href="/promoters/posts">Submit a post</Link> · <Link href="/withdraw">Request withdrawal</Link></p>
+        </section>
+        <section className="panel">
+          <span className="badge">Reward transparency</span>
+          <h2>Reward terms</h2>
+          <div className="grid2">
+            <div className="metric"><span>Reward pool status</span><strong>{rewardStatus}</strong></div>
+            <div className="metric"><span>Points → SOL rate</span><strong>{pointsToSolRate}</strong></div>
+            <div className="metric"><span>Minimum withdrawal</span><strong>{minimumWithdrawal}</strong></div>
+            <div className="metric"><span>Payment cycle</span><strong>{paymentCycle}</strong></div>
+          </div>
+          <p className="notice">Example fixed rate: 100 points = 0.05 SOL is an example only, not live terms, unless admins configure it and activate the unofficial reward pool.</p>
         </section>
       </div>
 

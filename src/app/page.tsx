@@ -6,10 +6,14 @@ import { formatDate } from "@/lib/format";
 
 export default async function Home() {
   const rewardPool = await prisma.rewardPool.findUnique({ where: { id: 1 } });
-  const poolLabel = rewardPool?.active && rewardPool.amount ? rewardPool.amount : "Awaiting admin update";
+  const rewardStatus = rewardPool?.active ? "Active" : "Inactive";
+  const poolLabel = rewardPool?.active && rewardPool.amount ? rewardPool.amount : "Inactive";
   const poolDescription = rewardPool?.active
-    ? rewardPool.description || "Active promoter rewards are reviewed by admin before payout."
-    : "The reward pool can be activated or adjusted from the admin dashboard when a campaign is ready.";
+    ? rewardPool.description || "Active promoter rewards are unofficial and reviewed by admin before payout."
+    : "The reward pool is inactive until admins announce unofficial campaign terms.";
+  const pointsToSolRate = rewardPool?.pointsToSolRate || "Inactive / not announced yet";
+  const minimumWithdrawal = rewardPool?.minimumWithdrawal || "Inactive / not announced yet";
+  const paymentCycle = rewardPool?.paymentCycle || "Manual / not active yet";
   const campaignWindow = rewardPool?.campaignStartAt || rewardPool?.campaignEndAt
     ? `${rewardPool.campaignStartAt ? formatDate(rewardPool.campaignStartAt) : "Open start"} → ${rewardPool.campaignEndAt ? formatDate(rewardPool.campaignEndAt) : "Open end"}`
     : "";
@@ -36,7 +40,7 @@ export default async function Home() {
           </div>
           <h1 id="promo-title"><span className="headlinePlain">Promote RefundYourSOL on X.</span><span>Submit hashtag posts.</span></h1>
           <p className="lede heroCopy">
-            Earn reviewed SOL rewards from admin-approved posts containing <strong>#RefundYourSol</strong> or <strong>#RYS</strong>.
+            Submit posts containing <strong>#RefundYourSol</strong> or <strong>#RYS</strong> for admin-reviewed points. SOL reward terms are inactive until admins announce a pool.
           </p>
           <div className="ctaRow heroActions">
             <Link className="button glowButton" href="/promoters/apply">Apply as promoter</Link>
@@ -79,7 +83,7 @@ export default async function Home() {
         <div>
           <span>Twitter/X promoter rewards</span>
           <h2>Turn campaign posts into reviewed point totals.</h2>
-          <p>Use the public forms to join, submit eligible X post URLs, check status by X handle plus wallet, and request withdrawal after admin approval.</p>
+          <p>Use the public forms to join, submit eligible X post URLs, check status by X handle plus wallet, and request withdrawal only when admin-reviewed reward terms are active.</p>
         </div>
         <div className="bannerActions">
           <Link className="button purple" href="/promoters/apply">Start application</Link>
@@ -110,6 +114,17 @@ export default async function Home() {
             <div><span>Comment cap</span><strong>{pointRules.maxEligibleCommentsPerUser} per user/post</strong></div>
           </div>
           <p className="notice">Eligible posts must include <strong>#RefundYourSol</strong> or <strong>#RYS</strong>. Promoters need {promoterQuality.minimumFollowersLabel} followers, an established account, preferably a Crypto/Solana audience, no fake engagement, and must not impersonate the official RefundYourSOL account. Rewards and withdrawals remain subject to admin approval.</p>
+        </div>
+        <div className="panel">
+          <span className="badge">Reward transparency</span>
+          <h2>{rewardPool?.active ? "Unofficial reward terms are admin-reviewed." : "Unofficial reward terms are currently inactive."}</h2>
+          <div className="grid2">
+            <div className="metric"><span>Reward pool status</span><strong>{rewardStatus}</strong><p>{rewardPool?.amount || "No pool amount announced"}</p></div>
+            <div className="metric"><span>Points → SOL conversion rate</span><strong>{pointsToSolRate}</strong></div>
+            <div className="metric"><span>Minimum withdrawal</span><strong>{minimumWithdrawal}</strong></div>
+            <div className="metric"><span>Payment cycle</span><strong>{paymentCycle}</strong></div>
+          </div>
+          <p className="notice">Example fixed rate: 100 points = 0.05 SOL. This is an example only, not live terms, unless admins save it as the configured conversion rate and activate the reward pool.</p>
         </div>
       </section>
     </main>

@@ -36,13 +36,16 @@ model Promoter {
 }
 
 model RewardPool {
-  id              Int       @id @default(1)
-  amount          String    @default("")
-  description     String    @default("")
-  active          Boolean   @default(false)
-  campaignStartAt DateTime?
-  campaignEndAt   DateTime?
-  updatedAt       DateTime  @updatedAt
+  id                Int       @id @default(1)
+  amount            String    @default("")
+  description       String    @default("")
+  active            Boolean   @default(false)
+  pointsToSolRate   String?
+  minimumWithdrawal String?
+  paymentCycle      String?
+  campaignStartAt   DateTime?
+  campaignEndAt     DateTime?
+  updatedAt         DateTime  @updatedAt
 }
 
 model PromoterPost {
