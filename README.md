@@ -25,7 +25,8 @@ These are general community links, not referral-code links:
 
 - Promoter codes are not used.
 - Promoters are identified by Twitter/X profile URL or handle.
-- A promoter is marked verified automatically when `followerCount > 1000`.
+- A promoter is marked verified automatically when `followerCount >= 1000`, then remains subject to admin/manual quality review.
+- Promoter quality criteria: minimum 1000+ followers; established Twitter/X account required or reviewed, with new/unclear accounts rejectable; Crypto/Solana-related audience preferred; no bot/fake engagement; posts must use `#RefundYourSol` or `#RYS`; promoters must not impersonate the official RefundYourSOL account.
 - Promoters submit Twitter/X post URLs and optional pasted post text/evidence.
 - Eligible posts must contain `#RefundYourSol` or `#RYS`, case-insensitively. If no text/evidence is submitted, the post stays pending for manual admin review.
 - Points are calculated as:
@@ -193,5 +194,6 @@ sudo certbot --nginx -d refundyoursol.com -d www.refundyoursol.com
 - The site must always be described as an unofficial promotional community portal, not an official RefundYourSOL website.
 - No unauthorized scraping or guaranteed real-time X tracking is implemented.
 - Rewards, points eligibility, and withdrawals are manually reviewed by the admin.
+- Admin manual review should apply the promoter quality criteria: 1000+ followers, established/non-impersonating account, preferably Crypto/Solana audience, no bot/fake engagement, and required hashtags on submitted posts.
 - Promoters do not log in. They use their Twitter/X profile URL or handle for post submissions and withdrawals.
 - Never ask users for private keys or seed phrases.

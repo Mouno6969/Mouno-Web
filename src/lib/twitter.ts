@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { promoterQuality } from "./constants";
 
 export const pointRules = {
   like: 2,
@@ -13,7 +14,7 @@ export function parseCount(value: FormDataEntryValue | null) {
 }
 
 export function calculateVerified(followerCount: number) {
-  return followerCount > 1000;
+  return followerCount >= promoterQuality.minimumFollowers;
 }
 
 export function calculatePoints(likeCount: number, eligibleCommentCount: number, repostCount: number) {

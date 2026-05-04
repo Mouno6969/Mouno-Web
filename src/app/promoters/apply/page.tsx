@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { promoterQuality } from "@/lib/constants";
 import { applyPromoter } from "./actions";
 
 export default async function ApplyPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -10,11 +11,15 @@ export default async function ApplyPage({ searchParams }: { searchParams: Promis
         <section className="panel">
           <span className="badge">Twitter/X promoter application</span>
           <h1>Apply with your X profile.</h1>
-          <p className="lede">Your Twitter/X account link becomes your public promoter identifier. Profiles with more than 1000 followers are automatically marked verified in the product model.</p>
+          <p className="lede">Your Twitter/X account link becomes your public promoter identifier. Profiles with {promoterQuality.minimumFollowersLabel} followers are automatically marked verified in the product model, then remain subject to admin review.</p>
           <p className="notice">No X API key is configured in v1. Follower count is submitted for admin/manual review and can be updated by admin later.</p>
+          <div className="ruleList">
+            {promoterQuality.criteria.map((criterion) => <div key={criterion}><span>Quality check</span><strong>{criterion}</strong></div>)}
+          </div>
         </section>
         <section className="panel">
           <h2>Promoter details</h2>
+          <p className="notice">{promoterQuality.rejectionRisks}</p>
           {query.submitted ? <p className="message">Application submitted. Status: {query.verified === "1" ? "verified promoter" : "not verified yet"}.</p> : null}
           {query.exists ? <p className="message">That X profile already exists. Status: {query.verified === "1" ? "verified promoter" : "not verified yet"}.</p> : null}
           {query.error === "missing" ? <p className="message error">Display name, valid X profile URL/handle, and follower count are required.</p> : null}
