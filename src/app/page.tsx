@@ -1,11 +1,106 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { promoterQuality, site, socialLinks } from "@/lib/constants";
-import { pointRules } from "@/lib/twitter";
+import { displayHandle, pointRules } from "@/lib/twitter";
 import { formatDate } from "@/lib/format";
 
-export default async function Home() {
-  const rewardPool = await prisma.rewardPool.findUnique({ where: { id: 1 } });
+type LeaderboardRow = {
+  promoterId: number;
+  displayName: string;
+  xHandle: string;
+  points: number;
+  submittedPosts: number;
+  verifiedPosts: number;
+};
+
+type LeaderboardScope = "campaign" | "weekly" | "monthly" | "all";
+
+const leaderboardScopes: { key: LeaderboardScope; label: string }[] = [
+  { key: "campaign", label: "Current campaign" },
+  { key: "weekly", label: "Weekly" },
+  { key: "monthly", label: "Monthly" },
+  { key: "all", label: "All-time" },
+];
+
+function queryValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function isLeaderboardScope(value: string): value is LeaderboardScope {
+  return ["campaign", "weekly", "monthly", "all"].includes(value);
+}
+
+function leaderboardScopeLabel(scope: LeaderboardScope) {
+  if (scope === "campaign") return "Current campaign leaderboard";
+  if (scope === "weekly") return "Weekly leaderboard";
+  if (scope === "monthly") return "Monthly leaderboard";
+  return "All-time leaderboard";
+}
+
+function leaderboardDateRange(scope: LeaderboardScope, rewardPool: { campaignStartAt: Date | null; campaignEndAt: Date | null } | null) {
+  if (scope === "all") return undefined;
+  const now = new Date();
+  if (scope === "weekly") return { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
+  if (scope === "monthly") return { gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) };
+  if (!rewardPool?.campaignStartAt && !rewardPool?.campaignEndAt) return null;
+  return {
+    ...(rewardPool.campaignStartAt ? { gte: rewardPool.campaignStartAt } : {}),
+    ...(rewardPool.campaignEndAt ? { lte: rewardPool.campaignEndAt } : {}),
+  };
+}
+
+export const dynamic = "force-dynamic";
+
+export default async function Home({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const [query, rewardPool] = await Promise.all([
+    searchParams,
+    prisma.rewardPool.findUnique({ where: { id: 1 } }),
+  ]);
+  const hasCampaignDates = Boolean(rewardPool?.campaignStartAt || rewardPool?.campaignEndAt);
+  const requestedScope = queryValue(query.leaderboard);
+  const selectedScope = isLeaderboardScope(requestedScope) ? requestedScope : hasCampaignDates ? "campaign" : "all";
+  const dateRange = leaderboardDateRange(selectedScope, rewardPool);
+  const verifiedPointGroups = dateRange === null
+    ? []
+    : await prisma.promoterPost.groupBy({
+      by: ["promoterId"],
+      where: { status: "VERIFIED", hasRequiredHashtag: true, ...(dateRange ? { createdAt: dateRange } : {}) },
+      _sum: { points: true },
+      _count: { _all: true },
+    });
+  const promoterIds = verifiedPointGroups.map((group) => group.promoterId);
+  const [leaderboardPromoters, submittedPostGroups] = promoterIds.length
+    ? await Promise.all([
+        prisma.promoter.findMany({
+          where: { id: { in: promoterIds } },
+          select: { id: true, displayName: true, xHandle: true },
+        }),
+        prisma.promoterPost.groupBy({
+          by: ["promoterId"],
+          where: { promoterId: { in: promoterIds } },
+          _count: { _all: true },
+        }),
+      ])
+    : [[], []];
+  const promotersById = new Map(leaderboardPromoters.map((promoter) => [promoter.id, promoter]));
+  const submittedPostsByPromoter = new Map(submittedPostGroups.map((group) => [group.promoterId, group._count._all]));
+  const leaderboardRows = verifiedPointGroups
+    .map((group): LeaderboardRow | null => {
+      const promoter = promotersById.get(group.promoterId);
+      const points = group._sum.points || 0;
+      if (!promoter || points <= 0) return null;
+      return {
+        promoterId: group.promoterId,
+        displayName: promoter.displayName,
+        xHandle: displayHandle(promoter.xHandle),
+        points,
+        submittedPosts: submittedPostsByPromoter.get(group.promoterId) || group._count._all,
+        verifiedPosts: group._count._all,
+      };
+    })
+    .filter((row): row is LeaderboardRow => Boolean(row))
+    .sort((a, b) => b.points - a.points || b.verifiedPosts - a.verifiedPosts || a.displayName.localeCompare(b.displayName))
+    .slice(0, 5);
   const rewardStatus = rewardPool?.active ? "Active" : "Inactive";
   const poolLabel = rewardPool?.active && rewardPool.amount ? rewardPool.amount : "Inactive";
   const poolDescription = rewardPool?.active
@@ -17,6 +112,16 @@ export default async function Home() {
   const campaignWindow = rewardPool?.campaignStartAt || rewardPool?.campaignEndAt
     ? `${rewardPool.campaignStartAt ? formatDate(rewardPool.campaignStartAt) : "Open start"} → ${rewardPool.campaignEndAt ? formatDate(rewardPool.campaignEndAt) : "Open end"}`
     : "";
+  const selectedScopeLabel = leaderboardScopeLabel(selectedScope);
+  const leaderboardDescription = selectedScope === "campaign"
+    ? campaignWindow
+      ? `Verified posts submitted during ${campaignWindow}.`
+      : "Current campaign dates are not configured yet. Use all-time for the full verified leaderboard."
+    : selectedScope === "weekly"
+      ? "Verified posts submitted in the last 7 days."
+      : selectedScope === "monthly"
+        ? "Verified posts submitted in the last 30 days."
+        : "All admin-verified submitted posts.";
 
   return (
     <main className="homePage">
@@ -46,7 +151,6 @@ export default async function Home() {
             <Link className="button glowButton" href="/promoters/apply">Apply as promoter</Link>
             <Link className="button dark" href="/promoters/posts">Submit X post</Link>
             <Link className="ghostButton" href="/status">Check status</Link>
-            <Link className="ghostButton" href="/withdraw">Request withdrawal</Link>
           </div>
         </div>
 
@@ -83,12 +187,57 @@ export default async function Home() {
         <div>
           <span>Twitter/X promoter rewards</span>
           <h2>Turn campaign posts into reviewed point totals.</h2>
-          <p>Use the public forms to join, submit eligible X post URLs, check status by X handle plus wallet, and request withdrawal only when admin-reviewed reward terms are active.</p>
+          <p>Use the public forms to join, submit eligible X post URLs, and check public status. Withdrawal requests are promoter-only and only meaningful when admin-reviewed reward terms are active.</p>
         </div>
         <div className="bannerActions">
           <Link className="button purple" href="/promoters/apply">Start application</Link>
           <Link className="button dark" href="/promoters/posts">Add post</Link>
           <Link className="ghostButton" href="/status">Check status</Link>
+        </div>
+      </section>
+
+      <section id="leaderboard" className="section grid2 leaderboardPreview" aria-label="Promoter leaderboard preview">
+        <div className="panel leaderboardPanel">
+          <span className="badge">Promoter leaderboard</span>
+          <h2>{selectedScopeLabel}</h2>
+          <p>{leaderboardDescription}</p>
+          <p className="notice">Only admin-verified posts with required hashtags count. Private payout details and admin notes are never shown here.</p>
+          <div className="leaderboardTabs" aria-label="Leaderboard scope">
+            {leaderboardScopes.map((scope) => (
+              <Link className={`leaderboardTab ${scope.key === selectedScope ? "active" : ""}`} href={`/?leaderboard=${scope.key}#leaderboard`} key={scope.key}>
+                {scope.label}
+              </Link>
+            ))}
+          </div>
+          <div className="ctaRow">
+            <Link className="button dark" href="/status">Check status</Link>
+            <Link className="ghostButton" href="/promoters/apply">Apply as promoter</Link>
+            <Link className="ghostButton" href="/promoters/posts">Submit X post</Link>
+          </div>
+        </div>
+        <div className="panel leaderboardPanel compactPanel">
+          {leaderboardRows.length ? (
+            <div className="leaderboardRows">
+              {leaderboardRows.map((row, index) => (
+                <div className="leaderboardRow" key={row.promoterId}>
+                  <strong className="leaderboardRank">#{index + 1}</strong>
+                  <div className="leaderboardIdentity">
+                    <b>{row.displayName}</b>
+                    <span>{row.xHandle}</span>
+                  </div>
+                  <div className="leaderboardPoints">
+                    <strong>{row.points.toLocaleString()} pts</strong>
+                    <span>{row.submittedPosts.toLocaleString()} total submitted / {row.verifiedPosts.toLocaleString()} scoped verified</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="emptyLeaderboard">
+              <span className="status PENDING">Waiting for verified posts</span>
+              <p>{dateRange === null ? "Current campaign dates are not configured yet." : "Leaderboard appears after admin verifies promoter points in this scope."}</p>
+            </div>
+          )}
         </div>
       </section>
 
