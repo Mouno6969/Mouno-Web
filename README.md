@@ -25,7 +25,9 @@ These are general community links, not referral-code links:
 
 - Promoter codes are not used.
 - Promoters are identified by Twitter/X profile URL or handle.
-- A promoter is marked verified automatically when `followerCount > 1000`.
+- A promoter is marked verified automatically when `followerCount >= 1000`.
+- Promoter quality criteria require 1000+ followers, account age disclosure, no bot/fake engagement, required `#RefundYourSol` or `#RYS` use, and no impersonation of the official RefundYourSOL account.
+- Crypto/Solana-related audiences are preferred for promoter approval.
 - Promoters submit Twitter/X post URLs and optional pasted post text/evidence.
 - Eligible posts must contain `#RefundYourSol` or `#RYS`, case-insensitively. If no text/evidence is submitted, the post stays pending for manual admin review.
 - Points are calculated as:
@@ -51,7 +53,7 @@ A future authorized X API integration can populate the same `PromoterPost` and `
 
 Prisma models are defined in `prisma/schema.prisma`.
 
-- `Promoter`: display name, unique X profile URL, optional handle, follower count, automatic/manual verified flag, optional SOL wallet, active flag.
+- `Promoter`: display name, unique X profile URL, optional handle, follower count, account age, criteria acknowledgement, automatic/manual verified flag, optional SOL wallet, active flag.
 - `RewardPool`: singleton record (`id = 1`) with display amount, description, active flag, and update timestamp.
 - `PromoterPost`: submitted X post URL, optional text/evidence, hashtag status, review status (`PENDING`, `VERIFIED`, `REJECTED`), engagement counts, calculated points, admin note.
 - `PostCommentEngagement`: per-post commenter handle and comment count. `eligibleCount` is capped at `min(commentCount, 2)`.
@@ -193,5 +195,6 @@ sudo certbot --nginx -d refundyoursol.com -d www.refundyoursol.com
 - The site must always be described as an unofficial promotional community portal, not an official RefundYourSOL website.
 - No unauthorized scraping or guaranteed real-time X tracking is implemented.
 - Rewards, points eligibility, and withdrawals are manually reviewed by the admin.
+- Admins should verify promoter audience quality, account age, follower count, required hashtag use, bot/fake engagement risk, and no official-account impersonation before approval.
 - Promoters do not log in. They use their Twitter/X profile URL or handle for post submissions and withdrawals.
 - Never ask users for private keys or seed phrases.

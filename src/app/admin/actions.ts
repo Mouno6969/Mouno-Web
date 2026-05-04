@@ -40,6 +40,7 @@ export async function createPromoter(formData: FormData) {
   const xProfileUrl = normalizeXProfileUrl(rawProfile);
   const xHandle = extractXHandle(rawProfile);
   const followerCount = parseCount(formData.get("followerCount"));
+  const accountAge = cleanText(formData.get("accountAge"), 80);
 
   if (!displayName || !xProfileUrl || !xHandle) redirect("/admin?error=promoter");
 
@@ -50,6 +51,8 @@ export async function createPromoter(formData: FormData) {
         xProfileUrl,
         xHandle,
         followerCount,
+        accountAge: accountAge || null,
+        criteriaAccepted: formData.get("criteriaAccepted") === "on",
         verified: calculateVerified(followerCount),
         solWallet: cleanText(formData.get("solWallet"), 120) || null,
         active: true,
@@ -69,6 +72,7 @@ export async function updatePromoter(formData: FormData) {
   const xProfileUrl = normalizeXProfileUrl(rawProfile);
   const xHandle = extractXHandle(rawProfile);
   const followerCount = parseCount(formData.get("followerCount"));
+  const accountAge = cleanText(formData.get("accountAge"), 80);
   const verificationMode = cleanText(formData.get("verificationMode"), 20);
   const verified = verificationMode === "verified" ? true : verificationMode === "unverified" ? false : calculateVerified(followerCount);
 
@@ -81,6 +85,8 @@ export async function updatePromoter(formData: FormData) {
       xProfileUrl,
       xHandle,
       followerCount,
+      accountAge: accountAge || null,
+      criteriaAccepted: formData.get("criteriaAccepted") === "on",
       verified,
       solWallet: cleanText(formData.get("solWallet"), 120) || null,
       active: formData.get("active") === "on",

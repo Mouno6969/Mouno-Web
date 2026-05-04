@@ -26,6 +26,8 @@ model Promoter {
   xProfileUrl        String              @unique
   xHandle            String?
   followerCount      Int                 @default(0)
+  accountAge         String?
+  criteriaAccepted   Boolean             @default(false)
   verified           Boolean             @default(false)
   solWallet          String?
   active             Boolean             @default(true)

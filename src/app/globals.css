@@ -249,6 +249,37 @@ p { color: var(--muted); line-height: 1.65; }
 .rewardBanner h2 { margin-top: 10px; max-width: 640px; }
 .rewardBanner p { margin-bottom: 0; max-width: 680px; color:#e9d5ff; }
 .bannerActions { display:flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.criteriaCard {
+  display: grid;
+  grid-template-columns: minmax(0, .88fr) minmax(320px, 1.12fr);
+  gap: 22px;
+  align-items: center;
+  padding: 28px;
+  margin-top: 18px;
+  border-radius: 32px;
+  border: 1px solid rgba(20, 241, 201, .28);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(20, 241, 201, .16), transparent 16rem),
+    linear-gradient(135deg, rgba(9, 15, 32, .92), rgba(48, 24, 89, .78));
+  box-shadow: 0 26px 80px rgba(0,0,0,.3);
+}
+.criteriaCard h2 { margin-top: 16px; }
+.criteriaCard p { max-width: 560px; color:#ddd6fe; }
+.criteriaMini { margin-top: 22px; }
+.criteriaMini h2 { font-size: 26px; }
+.criteriaList { display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 0; padding: 0; list-style: none; }
+.criteriaList li {
+  position: relative;
+  padding: 13px 14px 13px 38px;
+  border-radius: 18px;
+  border: 1px solid rgba(203, 213, 225, .17);
+  background: rgba(255,255,255,.055);
+  color: var(--soft);
+}
+.criteriaList li::before { content: "✓"; position: absolute; left: 14px; color: var(--accent-2); font-weight: 900; }
+.criteriaList.compact { grid-template-columns: 1fr; margin-top: 14px; }
+.checkField { display:flex; gap: 10px; align-items:flex-start; color: var(--soft); font-size: 14px; line-height: 1.55; }
+.checkField input { margin-top: 4px; accent-color: var(--accent-2); }
 .learnCue { display:grid; place-items:center; gap: 7px; padding: 34px 0 8px; color:#d8b4fe; font-size: 13px; text-transform: uppercase; letter-spacing:.18em; }
 .learnCue b { width: 34px; height: 34px; border-radius: 999px; display:grid; place-items:center; border: 1px solid rgba(216, 180, 254, .4); background: rgba(155, 92, 255, .14); font-size: 22px; line-height: 1; }
 .infoSection { align-items: stretch; }
@@ -311,6 +342,7 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
   .statGrid { grid-template-columns: repeat(2, 1fr); }
   .footer, .adminHeader { flex-direction: column; }
   .rewardBanner, .promoAdCard { flex-direction: column; align-items: stretch; }
+  .criteriaCard, .criteriaList { grid-template-columns: 1fr; }
   .bannerActions { justify-content: flex-start; }
 }
 @media (max-width: 600px) {
