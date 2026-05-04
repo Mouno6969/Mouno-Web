@@ -11,8 +11,11 @@ export async function applyPromoter(formData: FormData) {
   const xProfileUrl = normalizeXProfileUrl(rawProfile);
   const xHandle = extractXHandle(rawProfile);
   const followerCount = parseCount(formData.get("followerCount"));
+  const accountAge = cleanText(formData.get("accountAge"), 80);
+  const criteriaAccepted = formData.get("criteriaAccepted") === "on";
 
-  if (!displayName || !xProfileUrl || !xHandle) redirect("/promoters/apply?error=missing");
+  if (!displayName || !xProfileUrl || !xHandle || !accountAge) redirect("/promoters/apply?error=missing");
+  if (!criteriaAccepted) redirect("/promoters/apply?error=criteria");
 
   const existing = await prisma.promoter.findUnique({ where: { xProfileUrl } });
   if (existing) redirect(`/promoters/apply?exists=1&verified=${existing.verified ? "1" : "0"}`);
@@ -23,6 +26,8 @@ export async function applyPromoter(formData: FormData) {
       xProfileUrl,
       xHandle,
       followerCount,
+      accountAge,
+      criteriaAccepted,
       verified: calculateVerified(followerCount),
       solWallet: cleanText(formData.get("solWallet"), 120) || null,
     },

@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
+import { promoterCriteriaAcknowledgement } from "@/lib/promoterCriteria";
 import { displayHandle, pointRules } from "@/lib/twitter";
 import { createPromoter, logoutAdmin, updatePost, updatePromoter, updateRewardPool, updateWithdrawal, upsertCommentEngagement } from "./actions";
 
@@ -73,9 +74,11 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
               <label className="field">X profile URL/handle <input name="xProfileUrl" required placeholder="https://x.com/handle" /></label>
             </div>
             <div className="formRow">
-              <label className="field">Follower count <input name="followerCount" required inputMode="numeric" placeholder="1001" /></label>
-              <label className="field">SOL wallet <input name="solWallet" placeholder="Optional wallet" /></label>
+              <label className="field">Follower count <input name="followerCount" required inputMode="numeric" placeholder="1000" /></label>
+              <label className="field">Account age / created year <input name="accountAge" placeholder="Example: created 2021" /></label>
             </div>
+            <label className="field">SOL wallet <input name="solWallet" placeholder="Optional wallet" /></label>
+            <label className="checkField"><input type="checkbox" name="criteriaAccepted" /> <span>Criteria accepted by promoter</span></label>
             <button className="button" type="submit">Create promoter</button>
           </form>
         </div>
@@ -88,14 +91,16 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
 
       <section className="section">
         <h2>Promoters</h2>
+        <p className="notice">Verify audience quality before approval: 1000+ followers, account age, crypto/Solana audience fit, no bot/fake engagement, required #RefundYourSol or #RYS use, and no impersonation of the official RefundYourSOL account.</p>
         <div className="tableWrap">
           <table>
-            <thead><tr><th>Profile</th><th>Followers / status</th><th>Wallet</th><th>Activity</th><th>Update</th></tr></thead>
+            <thead><tr><th>Profile</th><th>Followers / status</th><th>Criteria</th><th>Wallet</th><th>Activity</th><th>Update</th></tr></thead>
             <tbody>
               {promoters.map((promoter) => (
                 <tr key={promoter.id}>
                   <td><strong>{promoter.displayName}</strong><br /><a className="copyBox" href={promoter.xProfileUrl} target="_blank" rel="noreferrer">{promoter.xProfileUrl}</a><br />{displayHandle(promoter.xHandle)}<br /><small>{formatDate(promoter.createdAt)}</small></td>
                   <td>{promoter.followerCount.toLocaleString()} followers<br /><span className={`status ${promoter.verified ? "APPROVED" : "PENDING"}`}>{promoter.verified ? "VERIFIED" : "UNVERIFIED"}</span><br /><span className={`status ${promoter.active ? "APPROVED" : "REJECTED"}`}>{promoter.active ? "ACTIVE" : "INACTIVE"}</span></td>
+                  <td>Age: {promoter.accountAge || "—"}<br /><span className={`status ${promoter.criteriaAccepted ? "APPROVED" : "PENDING"}`}>{promoter.criteriaAccepted ? "CRITERIA ACCEPTED" : "NO ACK"}</span></td>
                   <td className="copyBox">{promoter.solWallet || "—"}</td>
                   <td>{promoter._count.posts} posts<br />{promoter._count.withdrawalRequests} withdrawals<br />{promoterPoints(promoter.id)} verified points</td>
                   <td>
@@ -104,19 +109,21 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                       <input name="displayName" defaultValue={promoter.displayName} />
                       <input name="xProfileUrl" defaultValue={promoter.xProfileUrl} />
                       <input name="followerCount" defaultValue={promoter.followerCount} inputMode="numeric" />
+                      <input name="accountAge" defaultValue={promoter.accountAge || ""} placeholder="Account age / created year" />
                       <select name="verificationMode" defaultValue="auto">
-                        <option value="auto">Auto by followers (&gt;1000)</option>
+                        <option value="auto">Auto by followers (1000+)</option>
                         <option value="verified">Force verified</option>
                         <option value="unverified">Force unverified</option>
                       </select>
                       <input name="solWallet" defaultValue={promoter.solWallet || ""} placeholder="SOL wallet" />
+                      <label className="checkField"><input type="checkbox" name="criteriaAccepted" defaultChecked={promoter.criteriaAccepted} /> <span>{promoterCriteriaAcknowledgement}</span></label>
                       <label className="field"><span><input type="checkbox" name="active" defaultChecked={promoter.active} /> Active</span></label>
                       <button className="ghostButton" type="submit">Save promoter</button>
                     </form>
                   </td>
                 </tr>
               ))}
-              {promoters.length === 0 ? <tr><td colSpan={5}>No promoters created yet.</td></tr> : null}
+              {promoters.length === 0 ? <tr><td colSpan={6}>No promoters created yet.</td></tr> : null}
             </tbody>
           </table>
         </div>

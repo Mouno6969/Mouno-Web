@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { site, socialLinks } from "@/lib/constants";
+import { promoterCriteria } from "@/lib/promoterCriteria";
 import { pointRules } from "@/lib/twitter";
 
 export default async function Home() {
@@ -54,7 +55,7 @@ export default async function Home() {
       <section className="homeStats" aria-label="Program facts">
         <article>
           <span>Verified threshold</span>
-          <strong>&gt; 1000</strong>
+          <strong>1000+</strong>
           <p>followers submitted for review</p>
         </article>
         <article>
@@ -79,6 +80,17 @@ export default async function Home() {
           <Link className="button purple" href="/promoters/apply">Start application</Link>
           <Link className="button dark" href="/promoters/posts">Add post</Link>
         </div>
+      </section>
+
+      <section className="criteriaCard" aria-labelledby="criteria-title">
+        <div>
+          <span className="badge">Promoter quality criteria</span>
+          <h2 id="criteria-title">Apply only with a real, relevant X audience.</h2>
+          <p>RefundYourSol Promo is unofficial. Promoters must not impersonate the official RefundYourSOL account or suggest they speak for it.</p>
+        </div>
+        <ul className="criteriaList">
+          {promoterCriteria.map((criterion) => <li key={criterion}>{criterion}</li>)}
+        </ul>
       </section>
 
       <section className="learnCue" aria-label="Learn more">
