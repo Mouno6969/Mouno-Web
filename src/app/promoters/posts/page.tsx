@@ -22,7 +22,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
         </section>
         <section className="panel">
           <h2>Post submission</h2>
-          {query.submitted ? <p className="message">Post submitted. Hashtag status: {query.hashtag === "1" ? "required hashtag found" : "pending manual hashtag verification"}.</p> : null}
+          {query.submitted ? <p className="message">Post submitted. Hashtag status: {query.hashtag === "1" ? "required hashtag found" : "pending manual hashtag verification"}. Use <Link href="/status">status lookup</Link> to check review results.</p> : null}
           {query.error === "missing" ? <p className="message error">X profile/handle and post URL are required.</p> : null}
           {query.error === "promoter" ? <p className="message error">Promoter not found or inactive. Apply first.</p> : null}
           {query.error === "duplicate" ? <p className="message error">That post URL has already been submitted.</p> : null}
@@ -32,7 +32,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
             <label className="field">Pasted post text or evidence <textarea name="postText" placeholder="Required: include #RefundYourSol or #RYS" /></label>
             <button className="button" type="submit">Submit post</button>
           </form>
-          <p><Link href="/promoters/apply">Need to apply first?</Link></p>
+          <p><Link href="/promoters/apply">Need to apply first?</Link> · <Link href="/status">Check status</Link></p>
         </section>
       </div>
     </main>

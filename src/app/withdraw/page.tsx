@@ -15,7 +15,7 @@ export default async function WithdrawPage({ searchParams }: { searchParams: Pro
         </section>
         <section className="panel">
           <h2>Withdrawal request</h2>
-          {query.submitted ? <p className="message">Request submitted for manual admin review.</p> : null}
+          {query.submitted ? <p className="message">Request submitted for manual admin review. Use <Link href="/status">status lookup</Link> to check withdrawal updates.</p> : null}
           {query.error === "missing" ? <p className="message error">Twitter/X profile, SOL wallet, and amount are required.</p> : null}
           {query.error === "promoter" ? <p className="message error">Promoter not found or inactive. Apply first.</p> : null}
           <form className="form" action={submitWithdrawalRequest}>
@@ -25,7 +25,7 @@ export default async function WithdrawPage({ searchParams }: { searchParams: Pro
             <label className="field">Message <textarea name="message" placeholder="Optional notes for admin" /></label>
             <button className="button" type="submit">Submit request</button>
           </form>
-          <p><Link href="/promoters/apply">Apply as promoter</Link> · <Link href="/promoters/posts">Submit post</Link></p>
+          <p><Link href="/promoters/apply">Apply as promoter</Link> · <Link href="/promoters/posts">Submit post</Link> · <Link href="/status">Check status</Link></p>
         </section>
       </div>
     </main>

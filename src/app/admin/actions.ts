@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { clearAdminSession, requireAdmin } from "@/lib/auth";
-import { cleanText } from "@/lib/format";
+import { cleanText, parseOptionalDate } from "@/lib/format";
 import { calculatePoints, calculateVerified, containsRequiredHashtag, extractXHandle, normalizeHandle, normalizeXProfileUrl, parseCount, recalculatePostCommentTotals } from "@/lib/twitter";
 import type { PostStatus, WithdrawalStatus } from "@prisma/client";
 
@@ -15,19 +15,18 @@ export async function logoutAdmin() {
 
 export async function updateRewardPool(formData: FormData) {
   await requireAdmin();
+  const data = {
+    amount: cleanText(formData.get("amount"), 80),
+    description: cleanText(formData.get("description"), 500),
+    active: formData.get("active") === "on",
+    campaignStartAt: parseOptionalDate(formData.get("campaignStartAt")),
+    campaignEndAt: parseOptionalDate(formData.get("campaignEndAt")),
+  };
+
   await prisma.rewardPool.upsert({
     where: { id: 1 },
-    create: {
-      id: 1,
-      amount: cleanText(formData.get("amount"), 80),
-      description: cleanText(formData.get("description"), 500),
-      active: formData.get("active") === "on",
-    },
-    update: {
-      amount: cleanText(formData.get("amount"), 80),
-      description: cleanText(formData.get("description"), 500),
-      active: formData.get("active") === "on",
-    },
+    create: { id: 1, ...data },
+    update: data,
   });
   revalidatePath("/");
   revalidatePath("/admin");
@@ -144,6 +143,7 @@ export async function updateWithdrawal(formData: FormData) {
     where: { id },
     data: {
       status,
+      payoutTxHash: cleanText(formData.get("payoutTxHash"), 160) || null,
       adminNote: cleanText(formData.get("adminNote"), 500) || null,
     },
   });

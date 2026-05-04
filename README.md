@@ -2,7 +2,7 @@
 
 Unofficial promotional community portal for RefundYourSOL at `Refundyoursol.com`.
 
-This v1 site runs a Twitter/X promoter points program: promoters apply with their X profile, submit RefundYourSOL hashtag posts, admins manually/API-ready-sync engagement counts, points are calculated automatically, and SOL withdrawals are manually reviewed.
+This v1 site is positioned around a sharper public flow: promote RefundYourSOL on X, submit hashtag posts, and earn reviewed SOL rewards through an unofficial community portal. Promoters apply with their X profile, submit RefundYourSOL hashtag posts, admins manually/API-ready-sync engagement counts, points are calculated automatically, and SOL withdrawals are manually reviewed.
 
 ## Stack
 
@@ -11,6 +11,7 @@ This v1 site runs a Twitter/X promoter points program: promoters apply with thei
 - Server Actions for public/admin forms
 - Signed httpOnly cookie admin session
 - No promoter authentication in v1
+- Public status lookup by X handle/profile plus SOL wallet
 - No official X API key required for the first version
 
 ## Social links promoted
@@ -35,6 +36,11 @@ These are general community links, not referral-code links:
   - Repost = 3 points
   - At most two comments from the same Twitter/X user count per post.
 - Rewards and withdrawals are manually approved by admin and paid outside the app.
+- Promoters can check `/status` with their X handle/profile plus a SOL wallet from their profile or withdrawal request. Failed lookup responses are generic and do not reveal whether a handle exists.
+- Admins can export promoter, post, and withdrawal CSVs from protected `/admin/export/...` endpoints.
+- Withdrawal records can store a payout transaction hash for internal tracking and public proof of payment on matched status lookups.
+- Reward pools can include nullable campaign start/end dates displayed on the homepage when present.
+- Admin notes are internal-only: they are visible/editable in the admin dashboard and admin CSV exports, but are not exposed on the public status page.
 
 ## Free/manual X verification limitation
 
@@ -53,10 +59,10 @@ A future authorized X API integration can populate the same `PromoterPost` and `
 Prisma models are defined in `prisma/schema.prisma`.
 
 - `Promoter`: display name, unique X profile URL, optional handle, follower count, automatic/manual verified flag, optional SOL wallet, active flag.
-- `RewardPool`: singleton record (`id = 1`) with display amount, description, active flag, and update timestamp.
+- `RewardPool`: singleton record (`id = 1`) with display amount, description, active flag, optional campaign start/end dates, and update timestamp.
 - `PromoterPost`: submitted X post URL, optional text/evidence, hashtag status, review status (`PENDING`, `VERIFIED`, `REJECTED`), engagement counts, calculated points, admin note.
 - `PostCommentEngagement`: per-post commenter handle and comment count. `eligibleCount` is capped at `min(commentCount, 2)`.
-- `WithdrawalRequest`: promoter-linked SOL wallet request with amount, message, status (`PENDING`, `APPROVED`, `REJECTED`, `PAID`), and admin note.
+- `WithdrawalRequest`: promoter-linked SOL wallet request with amount, message, status (`PENDING`, `APPROVED`, `REJECTED`, `PAID`), optional payout transaction hash, and internal admin note.
 
 Admin credentials are not stored in the database. The v1 admin username defaults to `@Hazrod_m`, and the password is read from `ADMIN_PASSWORD`.
 
@@ -101,6 +107,7 @@ Public flows:
 - Apply as promoter: `/promoters/apply`
 - Submit Twitter/X post: `/promoters/posts`
 - Request withdrawal: `/withdraw`
+- Check public promoter status: `/status`
 
 ## Production build
 
@@ -195,5 +202,6 @@ sudo certbot --nginx -d refundyoursol.com -d www.refundyoursol.com
 - No unauthorized scraping or guaranteed real-time X tracking is implemented.
 - Rewards, points eligibility, and withdrawals are manually reviewed by the admin.
 - Admin manual review should apply the promoter quality criteria: 1000+ followers, established/non-impersonating account, preferably Crypto/Solana audience, no bot/fake engagement, and required hashtags on submitted posts.
-- Promoters do not log in. They use their Twitter/X profile URL or handle for post submissions and withdrawals.
+- Promoters do not log in. They use their Twitter/X profile URL or handle for post submissions, withdrawals, and public `/status` lookup with a SOL wallet factor.
+- Admin notes must remain internal-only and should not be rendered on public pages.
 - Never ask users for private keys or seed phrases.
