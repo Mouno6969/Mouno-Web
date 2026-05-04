@@ -7,6 +7,10 @@ function queryValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] || "" : value || "";
 }
 
+function latestUpdatedAt(items: { updatedAt: Date }[]) {
+  return items.reduce<Date | null>((latest, item) => (!latest || item.updatedAt > latest ? item.updatedAt : latest), null);
+}
+
 async function loadPromoterStatus(xIdentifier: string, solWallet: string) {
   if (!xIdentifier || !solWallet) return null;
   const resolved = await findPromoterByXIdentifier(xIdentifier);
@@ -47,6 +51,15 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
     verified: posts.filter((post) => post.status === "VERIFIED").length,
     rejected: posts.filter((post) => post.status === "REJECTED").length,
   };
+  const lastAdminReviewDate = latestUpdatedAt([
+    ...posts.filter((post) => post.status !== "PENDING"),
+    ...withdrawals.filter((request) => request.status !== "PENDING"),
+  ]);
+  const lastPointsUpdate = latestUpdatedAt(
+    posts.filter(
+      (post) => post.points > 0 || post.likeCount > 0 || post.repostCount > 0 || post.eligibleCommentCount > 0 || post.totalCommentCount > 0,
+    ),
+  );
 
   return (
     <main className="section">
@@ -89,6 +102,8 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
                 <div className="metric"><span>Promoter status</span><strong>{promoter.active ? "Active" : "Inactive"}</strong><p>{promoter.verified ? "Verified" : "Not verified"}</p></div>
                 <div className="metric"><span>Followers</span><strong>{promoter.followerCount.toLocaleString()}</strong><p>Submitted for review</p></div>
                 <div className="metric"><span>Total verified points</span><strong>{totalVerifiedPoints}</strong><p>Admin-reviewed posts only</p></div>
+                <div className="metric compactMetric"><span>Last admin review date</span><strong>{lastAdminReviewDate ? formatDate(lastAdminReviewDate) : "Not reviewed yet"}</strong><p>Based on reviewed posts or withdrawal requests in this app.</p></div>
+                <div className="metric compactMetric"><span>Last points update</span><strong>{lastPointsUpdate ? formatDate(lastPointsUpdate) : "No points update yet"}</strong><p>Based on admin-updated points or engagement records, not live X tracking.</p></div>
               </div>
               <p>Created: {formatDate(promoter.createdAt)} · Updated: {formatDate(promoter.updatedAt)}</p>
             </div>
