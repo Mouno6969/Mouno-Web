@@ -7,15 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Platform {
-  TELEGRAM
-  DISCORD
-  TWITTER
-}
-
-enum ReviewStatus {
+enum PostStatus {
   PENDING
-  APPROVED
+  VERIFIED
   REJECTED
 }
 
@@ -28,62 +22,67 @@ enum WithdrawalStatus {
 
 model Promoter {
   id                 Int                 @id @default(autoincrement())
-  name               String
-  handle             String?
-  code               String              @unique
+  displayName        String
+  xProfileUrl        String              @unique
+  xHandle            String?
+  followerCount      Int                 @default(0)
+  verified           Boolean             @default(false)
   solWallet          String?
   active             Boolean             @default(true)
   createdAt          DateTime            @default(now())
-  outboundClicks     OutboundClick[]
-  referralClaims     ReferralClaim[]
+  updatedAt          DateTime            @updatedAt
+  posts              PromoterPost[]
   withdrawalRequests WithdrawalRequest[]
 }
 
 model RewardPool {
-  id            Int      @id @default(1)
-  amount        String   @default("")
-  description   String   @default("")
-  active        Boolean  @default(false)
-  updatedAt     DateTime @updatedAt
+  id          Int      @id @default(1)
+  amount      String   @default("")
+  description String   @default("")
+  active      Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
 }
 
-model OutboundClick {
-  id          Int      @id @default(autoincrement())
-  promoterId  Int?
-  code        String
-  platform    Platform
-  ipHash      String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  promoter    Promoter? @relation(fields: [promoterId], references: [id], onDelete: SetNull)
+model PromoterPost {
+  id                   Int                     @id @default(autoincrement())
+  promoterId           Int
+  postUrl              String                  @unique
+  postText             String?
+  hasRequiredHashtag   Boolean                 @default(false)
+  status               PostStatus              @default(PENDING)
+  adminNote            String?
+  likeCount            Int                     @default(0)
+  repostCount          Int                     @default(0)
+  eligibleCommentCount Int                     @default(0)
+  totalCommentCount    Int                     @default(0)
+  points               Int                     @default(0)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  promoter             Promoter                @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  commentEngagements   PostCommentEngagement[]
 
-  @@index([code])
-  @@index([platform])
-  @@index([createdAt])
+  @@index([promoterId])
+  @@index([status])
+  @@index([hasRequiredHashtag])
 }
 
-model ReferralClaim {
+model PostCommentEngagement {
   id             Int          @id @default(autoincrement())
-  promoterId     Int?
-  code           String
-  displayName    String?
-  contactHandle  String?
-  solWallet      String
-  status         ReviewStatus @default(PENDING)
-  approvedAmount String?
-  adminNote      String?
+  postId         Int
+  commenterHandle String
+  commentCount   Int          @default(0)
+  eligibleCount  Int          @default(0)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  promoter       Promoter?    @relation(fields: [promoterId], references: [id], onDelete: SetNull)
+  post           PromoterPost @relation(fields: [postId], references: [id], onDelete: Cascade)
 
-  @@index([code])
-  @@index([status])
+  @@unique([postId, commenterHandle])
+  @@index([commenterHandle])
 }
 
 model WithdrawalRequest {
   id              Int              @id @default(autoincrement())
-  promoterId      Int?
-  code            String
+  promoterId      Int
   solWallet       String
   requestedAmount String
   status          WithdrawalStatus @default(PENDING)
@@ -91,8 +90,8 @@ model WithdrawalRequest {
   adminNote       String?
   createdAt       DateTime         @default(now())
   updatedAt       DateTime         @updatedAt
-  promoter        Promoter?        @relation(fields: [promoterId], references: [id], onDelete: SetNull)
+  promoter        Promoter         @relation(fields: [promoterId], references: [id], onDelete: Cascade)
 
-  @@index([code])
+  @@index([promoterId])
   @@index([status])
 }

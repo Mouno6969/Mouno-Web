@@ -11,10 +11,4 @@ export const socialLinks = {
   twitter: "https://x.com/RefundYourSOL",
 } as const;
 
-export const platformLabels = {
-  TELEGRAM: "Telegram",
-  DISCORD: "Discord",
-  TWITTER: "Twitter/X",
-} as const;
-
 export type SocialKey = keyof typeof socialLinks;

@@ -2,31 +2,60 @@
 
 Unofficial promotional community portal for RefundYourSOL at `Refundyoursol.com`.
 
-This v1 site promotes the public Telegram, Discord, and Twitter/X links, lets admins create promoter referral URLs, tracks outbound CTA clicks by referral code, accepts public claim submissions, and supports admin-reviewed SOL withdrawal requests.
+This v1 site runs a Twitter/X promoter points program: promoters apply with their X profile, submit RefundYourSOL hashtag posts, admins manually/API-ready-sync engagement counts, points are calculated automatically, and SOL withdrawals are manually reviewed.
 
 ## Stack
 
 - Next.js App Router + TypeScript
-- Prisma ORM + SQLite for a lightweight first VPS deployment
-- Server Actions for forms
+- Prisma ORM + SQLite for lightweight first deployment
+- Server Actions for public/admin forms
 - Signed httpOnly cookie admin session
 - No promoter authentication in v1
+- No official X API key required for the first version
 
 ## Social links promoted
+
+These are general community links, not referral-code links:
 
 - Telegram: `https://t.me/refundyoursolbot?start=ref_8704145840`
 - Discord: `https://discord.gg/VJ6tqnhrdu`
 - Twitter/X: `https://x.com/RefundYourSOL`
 
+## Product behavior
+
+- Promoter codes are not used.
+- Promoters are identified by Twitter/X profile URL or handle.
+- A promoter is marked verified automatically when `followerCount > 1000`.
+- Promoters submit Twitter/X post URLs and optional pasted post text/evidence.
+- Eligible posts must contain `#RefundYourSol` or `#RYS`, case-insensitively. If no text/evidence is submitted, the post stays pending for manual admin review.
+- Points are calculated as:
+  - Like = 2 points
+  - Comment = 1 point
+  - Repost = 3 points
+  - At most two comments from the same Twitter/X user count per post.
+- Rewards and withdrawals are manually approved by admin and paid outside the app.
+
+## Free/manual X verification limitation
+
+This app does **not** claim real-time or guaranteed Twitter/X tracking in production because no official X API key is configured. The first version is API-ready/manual-review:
+
+- Public users submit profile URLs, post URLs, and optional pasted post text/evidence.
+- Admins verify hashtag status from submitted evidence or manual checks.
+- Admins import/update like, repost, and comment counts.
+- The app enforces the two-eligible-comments-per-commenter rule when admin imports commenter rows.
+- Once engagement data exists, points recalculate automatically.
+
+A future authorized X API integration can populate the same `PromoterPost` and `PostCommentEngagement` models without changing the public flow. If an official X API bearer token becomes available later, add it as a new environment variable and implement server-side sync jobs against the existing schema.
+
 ## Data model
 
 Prisma models are defined in `prisma/schema.prisma`.
 
-- `Promoter`: name, optional handle, unique referral code, optional SOL wallet, active flag.
+- `Promoter`: display name, unique X profile URL, optional handle, follower count, automatic/manual verified flag, optional SOL wallet, active flag.
 - `RewardPool`: singleton record (`id = 1`) with display amount, description, active flag, and update timestamp.
-- `OutboundClick`: referral code, optional promoter relation, platform enum (`TELEGRAM`, `DISCORD`, `TWITTER`), hashed/truncated IP metadata, user agent, timestamp.
-- `ReferralClaim`: public claim tied to referral code/promoter, display/contact info, SOL wallet, status (`PENDING`, `APPROVED`, `REJECTED`), optional approved amount/admin note.
-- `WithdrawalRequest`: public withdrawal request tied to referral code/promoter, SOL wallet, requested amount, message, status (`PENDING`, `APPROVED`, `REJECTED`, `PAID`), optional admin note.
+- `PromoterPost`: submitted X post URL, optional text/evidence, hashtag status, review status (`PENDING`, `VERIFIED`, `REJECTED`), engagement counts, calculated points, admin note.
+- `PostCommentEngagement`: per-post commenter handle and comment count. `eligibleCount` is capped at `min(commentCount, 2)`.
+- `WithdrawalRequest`: promoter-linked SOL wallet request with amount, message, status (`PENDING`, `APPROVED`, `REJECTED`, `PAID`), and admin note.
 
 Admin credentials are not stored in the database. The v1 admin username defaults to `@Hazrod_m`, and the password is read from `ADMIN_PASSWORD`.
 
@@ -40,6 +69,8 @@ ADMIN_USERNAME="@Hazrod_m"
 ADMIN_PASSWORD="replace-with-a-long-random-password"
 ADMIN_SESSION_SECRET="replace-with-at-least-32-random-characters"
 NEXT_PUBLIC_SITE_URL="https://refundyoursol.com"
+# Optional future authorized X API integration; not used by v1 manual-sync flow.
+X_API_BEARER_TOKEN=""
 ```
 
 Do not commit `.env`, production passwords, private keys, seed phrases, or wallet secrets.
@@ -63,6 +94,12 @@ Admin login:
 - URL: `/admin/login`
 - Username: `@Hazrod_m` unless `ADMIN_USERNAME` is changed
 - Password: value of `ADMIN_PASSWORD`
+
+Public flows:
+
+- Apply as promoter: `/promoters/apply`
+- Submit Twitter/X post: `/promoters/posts`
+- Request withdrawal: `/withdraw`
 
 ## Production build
 
@@ -154,7 +191,7 @@ sudo certbot --nginx -d refundyoursol.com -d www.refundyoursol.com
 ## Operational notes
 
 - The site must always be described as an unofficial promotional community portal, not an official RefundYourSOL website.
-- Social join verification is not implemented in v1; the app tracks outbound clicks and public submissions only.
-- Rewards, claims, and withdrawals are manually reviewed by the admin.
-- Promoters do not log in. They use referral codes and public withdrawal requests.
+- No unauthorized scraping or guaranteed real-time X tracking is implemented.
+- Rewards, points eligibility, and withdrawals are manually reviewed by the admin.
+- Promoters do not log in. They use their Twitter/X profile URL or handle for post submissions and withdrawals.
 - Never ask users for private keys or seed phrases.

@@ -114,13 +114,13 @@ p { color: var(--muted); line-height: 1.65; }
 .notice { border: 1px solid rgba(246,196,83,.32); background: rgba(246,196,83,.08); color: #fde68a; border-radius: 20px; padding: 16px; }
 .form { display: grid; gap: 14px; }
 .field { display: grid; gap: 7px; color: var(--soft); font-size: 14px; }
-.field input, .field textarea, .field select {
+.field input, .field textarea, .field select, .form > input, .form > textarea, .form > select {
   width: 100%; border: 1px solid var(--line); border-radius: 16px;
   background: rgba(4, 8, 18, .72); color: var(--text);
   padding: 13px 14px; outline: none;
 }
-.field textarea { min-height: 92px; resize: vertical; }
-.field input:focus, .field textarea:focus, .field select:focus { border-color: rgba(20, 241, 201, .6); }
+.field textarea, .form > textarea { min-height: 92px; resize: vertical; }
+.field input:focus, .field textarea:focus, .field select:focus, .form > input:focus, .form > textarea:focus, .form > select:focus { border-color: rgba(20, 241, 201, .6); }
 .formRow { display:grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .status { display:inline-flex; padding: 5px 9px; border-radius:999px; font-size:12px; border:1px solid var(--line); color:var(--soft); background: rgba(255,255,255,.05); }
 .status.PENDING { color:#fde68a; border-color:rgba(246,196,83,.4); }

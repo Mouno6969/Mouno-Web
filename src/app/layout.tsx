@@ -4,8 +4,8 @@ import "./globals.css";
 import { site } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: `${site.name} | Unofficial RefundYourSOL Promo`,
-  description: "Unofficial promotional community portal for RefundYourSOL rewards, referrals, and social links.",
+  title: `${site.name} | Twitter/X Promoter Rewards`,
+  description: "Unofficial promotional community portal for RefundYourSOL Twitter/X promoter points and admin-reviewed SOL rewards.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -22,7 +22,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </span>
             </Link>
             <nav>
-              <Link href="/withdraw">Request withdrawal</Link>
+              <Link href="/promoters/apply">Apply</Link>
+              <Link href="/promoters/posts">Submit post</Link>
+              <Link href="/withdraw">Withdraw</Link>
               <Link href="/admin">Admin</Link>
             </nav>
           </header>

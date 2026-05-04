@@ -9,7 +9,7 @@ async function main() {
     create: {
       id: 1,
       amount: "",
-      description: "Reward pool not announced yet.",
+      description: "Twitter/X reward pool not announced yet.",
       active: false,
     },
   });

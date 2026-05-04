@@ -5,23 +5,8 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { clearAdminSession, requireAdmin } from "@/lib/auth";
 import { cleanText } from "@/lib/format";
-import type { ReviewStatus, WithdrawalStatus } from "@prisma/client";
-
-function makeCode(value: string) {
-  const base = value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 42);
-  return base || `promoter-${Math.random().toString(36).slice(2, 8)}`;
-}
-
-async function uniqueCode(seed: string) {
-  const base = makeCode(seed);
-  let code = base;
-  let suffix = 1;
-  while (await prisma.promoter.findUnique({ where: { code } })) {
-    suffix += 1;
-    code = `${base}-${suffix}`;
-  }
-  return code;
-}
+import { calculatePoints, calculateVerified, containsRequiredHashtag, extractXHandle, normalizeHandle, normalizeXProfileUrl, parseCount, recalculatePostCommentTotals } from "@/lib/twitter";
+import type { PostStatus, WithdrawalStatus } from "@prisma/client";
 
 export async function logoutAdmin() {
   await clearAdminSession();
@@ -50,42 +35,104 @@ export async function updateRewardPool(formData: FormData) {
 
 export async function createPromoter(formData: FormData) {
   await requireAdmin();
-  const name = cleanText(formData.get("name"), 100);
-  if (!name) redirect("/admin?error=promoter-name");
-  const requestedCode = cleanText(formData.get("code"), 80);
-  const code = await uniqueCode(requestedCode || name);
+  const displayName = cleanText(formData.get("displayName"), 100);
+  const rawProfile = cleanText(formData.get("xProfileUrl"), 180);
+  const xProfileUrl = normalizeXProfileUrl(rawProfile);
+  const xHandle = extractXHandle(rawProfile);
+  const followerCount = parseCount(formData.get("followerCount"));
 
-  await prisma.promoter.create({
+  if (!displayName || !xProfileUrl || !xHandle) redirect("/admin?error=promoter");
+
+  try {
+    await prisma.promoter.create({
+      data: {
+        displayName,
+        xProfileUrl,
+        xHandle,
+        followerCount,
+        verified: calculateVerified(followerCount),
+        solWallet: cleanText(formData.get("solWallet"), 120) || null,
+        active: true,
+      },
+    });
+  } catch {
+    redirect("/admin?error=duplicate-promoter");
+  }
+  revalidatePath("/admin");
+}
+
+export async function updatePromoter(formData: FormData) {
+  await requireAdmin();
+  const id = Number(formData.get("id"));
+  const displayName = cleanText(formData.get("displayName"), 100);
+  const rawProfile = cleanText(formData.get("xProfileUrl"), 180);
+  const xProfileUrl = normalizeXProfileUrl(rawProfile);
+  const xHandle = extractXHandle(rawProfile);
+  const followerCount = parseCount(formData.get("followerCount"));
+  const verificationMode = cleanText(formData.get("verificationMode"), 20);
+  const verified = verificationMode === "verified" ? true : verificationMode === "unverified" ? false : calculateVerified(followerCount);
+
+  if (!id || !displayName || !xProfileUrl || !xHandle) redirect("/admin?error=promoter");
+
+  await prisma.promoter.update({
+    where: { id },
     data: {
-      name,
-      handle: cleanText(formData.get("handle"), 100) || null,
-      code,
+      displayName,
+      xProfileUrl,
+      xHandle,
+      followerCount,
+      verified,
       solWallet: cleanText(formData.get("solWallet"), 120) || null,
-      active: true,
+      active: formData.get("active") === "on",
     },
   });
   revalidatePath("/admin");
 }
 
-export async function setPromoterActive(formData: FormData) {
+export async function updatePost(formData: FormData) {
   await requireAdmin();
   const id = Number(formData.get("id"));
-  await prisma.promoter.update({ where: { id }, data: { active: formData.get("active") === "true" } });
-  revalidatePath("/admin");
-}
+  const likeCount = parseCount(formData.get("likeCount"));
+  const repostCount = parseCount(formData.get("repostCount"));
+  const eligibleCommentCount = parseCount(formData.get("eligibleCommentCount"));
+  const totalCommentCount = parseCount(formData.get("totalCommentCount"));
+  const postText = cleanText(formData.get("postText"), 1000);
+  const manualHashtag = formData.get("hasRequiredHashtag") === "on";
+  const hasRequiredHashtag = manualHashtag || containsRequiredHashtag(postText);
+  const status = cleanText(formData.get("status"), 20) as PostStatus;
 
-export async function updateClaim(formData: FormData) {
-  await requireAdmin();
-  const id = Number(formData.get("id"));
-  const status = cleanText(formData.get("status"), 20) as ReviewStatus;
-  await prisma.referralClaim.update({
+  await prisma.promoterPost.update({
     where: { id },
     data: {
+      postText: postText || null,
+      hasRequiredHashtag,
       status,
-      approvedAmount: cleanText(formData.get("approvedAmount"), 80) || null,
+      likeCount,
+      repostCount,
+      eligibleCommentCount,
+      totalCommentCount: Math.max(totalCommentCount, eligibleCommentCount),
+      points: calculatePoints(likeCount, eligibleCommentCount, repostCount),
       adminNote: cleanText(formData.get("adminNote"), 500) || null,
     },
   });
+  revalidatePath("/admin");
+}
+
+export async function upsertCommentEngagement(formData: FormData) {
+  await requireAdmin();
+  const postId = Number(formData.get("postId"));
+  const commenterHandle = normalizeHandle(cleanText(formData.get("commenterHandle"), 80));
+  const commentCount = parseCount(formData.get("commentCount"));
+  const eligibleCount = Math.min(commentCount, 2);
+
+  if (!postId || !commenterHandle) redirect("/admin?error=comment");
+
+  await prisma.postCommentEngagement.upsert({
+    where: { postId_commenterHandle: { postId, commenterHandle } },
+    create: { postId, commenterHandle, commentCount, eligibleCount },
+    update: { commentCount, eligibleCount },
+  });
+  await recalculatePostCommentTotals(postId);
   revalidatePath("/admin");
 }
 
