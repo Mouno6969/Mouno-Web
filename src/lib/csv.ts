@@ -1,8 +1,9 @@
 export function csvEscape(value: unknown) {
   if (value === null || value === undefined) return "";
   const text = value instanceof Date ? value.toISOString() : String(value);
-  if (/[",\n\r]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
-  return text;
+  const safeText = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  if (/[",\n\r]/.test(safeText)) return `"${safeText.replace(/"/g, '""')}"`;
+  return safeText;
 }
 
 export function toCsv(rows: unknown[][]) {
