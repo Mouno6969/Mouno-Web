@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum PostStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  PAID
+}
+
+model Promoter {
+  id                 Int                 @id @default(autoincrement())
+  displayName        String
+  xProfileUrl        String              @unique
+  xHandle            String?
+  followerCount      Int                 @default(0)
+  verified           Boolean             @default(false)
+  solWallet          String?
+  active             Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  posts              PromoterPost[]
+  withdrawalRequests WithdrawalRequest[]
+}
+
+model RewardPool {
+  id          Int      @id @default(1)
+  amount      String   @default("")
+  description String   @default("")
+  active      Boolean  @default(false)
+  updatedAt   DateTime @updatedAt
+}
+
+model PromoterPost {
+  id                   Int                     @id @default(autoincrement())
+  promoterId           Int
+  postUrl              String                  @unique
+  postText             String?
+  hasRequiredHashtag   Boolean                 @default(false)
+  status               PostStatus              @default(PENDING)
+  adminNote            String?
+  likeCount            Int                     @default(0)
+  repostCount          Int                     @default(0)
+  eligibleCommentCount Int                     @default(0)
+  totalCommentCount    Int                     @default(0)
+  points               Int                     @default(0)
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  promoter             Promoter                @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+  commentEngagements   PostCommentEngagement[]
+
+  @@index([promoterId])
+  @@index([status])
+  @@index([hasRequiredHashtag])
+}
+
+model PostCommentEngagement {
+  id             Int          @id @default(autoincrement())
+  postId         Int
+  commenterHandle String
+  commentCount   Int          @default(0)
+  eligibleCount  Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  post           PromoterPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, commenterHandle])
+  @@index([commenterHandle])
+}
+
+model WithdrawalRequest {
+  id              Int              @id @default(autoincrement())
+  promoterId      Int
+  solWallet       String
+  requestedAmount String
+  status          WithdrawalStatus @default(PENDING)
+  message         String?
+  adminNote       String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  promoter        Promoter         @relation(fields: [promoterId], references: [id], onDelete: Cascade)
+
+  @@index([promoterId])
+  @@index([status])
+}
