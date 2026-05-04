@@ -12,3 +12,19 @@ export const socialLinks = {
 } as const;
 
 export type SocialKey = keyof typeof socialLinks;
+
+export const promoterQuality = {
+  minimumFollowers: 1000,
+  minimumFollowersLabel: "1000+",
+  requiredHashtags: ["#RefundYourSol", "#RYS"],
+  officialHandle: "@RefundYourSOL",
+  criteria: [
+    "Minimum 1000+ followers.",
+    "Established Twitter/X account required; new or unclear accounts may be rejected.",
+    "Crypto/Solana-related audience preferred.",
+    "No bot or fake engagement.",
+    "Posts must use #RefundYourSol or #RYS.",
+    "Do not impersonate the official RefundYourSOL account.",
+  ],
+  rejectionRisks: "Applications and posts may be rejected for new or unclear accounts, fake engagement, missing required hashtags, or impersonating the official RefundYourSOL account.",
+} as const;

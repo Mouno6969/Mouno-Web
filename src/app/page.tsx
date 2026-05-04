@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { site, socialLinks } from "@/lib/constants";
+import { promoterQuality, site, socialLinks } from "@/lib/constants";
 import { pointRules } from "@/lib/twitter";
 
 export default async function Home() {
@@ -54,7 +54,7 @@ export default async function Home() {
       <section className="homeStats" aria-label="Program facts">
         <article>
           <span>Verified threshold</span>
-          <strong>&gt; 1000</strong>
+          <strong>{promoterQuality.minimumFollowersLabel}</strong>
           <p>followers submitted for review</p>
         </article>
         <article>
@@ -102,7 +102,7 @@ export default async function Home() {
             <div><span>Repost</span><strong>{pointRules.repost} pts</strong></div>
             <div><span>Comment cap</span><strong>{pointRules.maxEligibleCommentsPerUser} per user/post</strong></div>
           </div>
-          <p className="notice">Eligible posts must include <strong>#RefundYourSol</strong> or <strong>#RYS</strong>. Rewards and withdrawals remain subject to admin approval.</p>
+          <p className="notice">Eligible posts must include <strong>#RefundYourSol</strong> or <strong>#RYS</strong>. Promoters need {promoterQuality.minimumFollowersLabel} followers, an established account, preferably a Crypto/Solana audience, no fake engagement, and must not impersonate the official RefundYourSOL account. Rewards and withdrawals remain subject to admin approval.</p>
         </div>
       </section>
     </main>

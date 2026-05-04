@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
+import { promoterQuality } from "@/lib/constants";
 import { displayHandle, pointRules } from "@/lib/twitter";
 import { createPromoter, logoutAdmin, updatePost, updatePromoter, updateRewardPool, updateWithdrawal, upsertCommentEngagement } from "./actions";
 
@@ -61,6 +62,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
             <div className="metric"><span>Repost</span><strong>{pointRules.repost}</strong></div>
           </div>
           <p className="notice">No official X API key is configured. Counts are manually imported or ready for future authorized API sync.</p>
+          <p className="notice">Manual review criteria: {promoterQuality.criteria.join(" ")}</p>
         </div>
       </section>
 
@@ -73,7 +75,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
               <label className="field">X profile URL/handle <input name="xProfileUrl" required placeholder="https://x.com/handle" /></label>
             </div>
             <div className="formRow">
-              <label className="field">Follower count <input name="followerCount" required inputMode="numeric" placeholder="1001" /></label>
+              <label className="field">Follower count <input name="followerCount" required inputMode="numeric" placeholder="1000" /></label>
               <label className="field">SOL wallet <input name="solWallet" placeholder="Optional wallet" /></label>
             </div>
             <button className="button" type="submit">Create promoter</button>
@@ -105,7 +107,7 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
                       <input name="xProfileUrl" defaultValue={promoter.xProfileUrl} />
                       <input name="followerCount" defaultValue={promoter.followerCount} inputMode="numeric" />
                       <select name="verificationMode" defaultValue="auto">
-                        <option value="auto">Auto by followers (&gt;1000)</option>
+                        <option value="auto">Auto by followers (1000+)</option>
                         <option value="verified">Force verified</option>
                         <option value="unverified">Force unverified</option>
                       </select>
