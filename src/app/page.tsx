@@ -13,18 +13,61 @@ type LeaderboardRow = {
   verifiedPosts: number;
 };
 
+type LeaderboardScope = "campaign" | "weekly" | "monthly" | "all";
+
+const leaderboardScopes: { key: LeaderboardScope; label: string }[] = [
+  { key: "campaign", label: "Current campaign" },
+  { key: "weekly", label: "Weekly" },
+  { key: "monthly", label: "Monthly" },
+  { key: "all", label: "All-time" },
+];
+
+function queryValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] || "" : value || "";
+}
+
+function isLeaderboardScope(value: string): value is LeaderboardScope {
+  return ["campaign", "weekly", "monthly", "all"].includes(value);
+}
+
+function leaderboardScopeLabel(scope: LeaderboardScope) {
+  if (scope === "campaign") return "Current campaign leaderboard";
+  if (scope === "weekly") return "Weekly leaderboard";
+  if (scope === "monthly") return "Monthly leaderboard";
+  return "All-time leaderboard";
+}
+
+function leaderboardDateRange(scope: LeaderboardScope, rewardPool: { campaignStartAt: Date | null; campaignEndAt: Date | null } | null) {
+  if (scope === "all") return undefined;
+  const now = new Date();
+  if (scope === "weekly") return { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
+  if (scope === "monthly") return { gte: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000) };
+  if (!rewardPool?.campaignStartAt && !rewardPool?.campaignEndAt) return null;
+  return {
+    ...(rewardPool.campaignStartAt ? { gte: rewardPool.campaignStartAt } : {}),
+    ...(rewardPool.campaignEndAt ? { lte: rewardPool.campaignEndAt } : {}),
+  };
+}
+
 export const dynamic = "force-dynamic";
 
-export default async function Home() {
-  const [rewardPool, verifiedPointGroups] = await Promise.all([
+export default async function Home({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const [query, rewardPool] = await Promise.all([
+    searchParams,
     prisma.rewardPool.findUnique({ where: { id: 1 } }),
-    prisma.promoterPost.groupBy({
+  ]);
+  const hasCampaignDates = Boolean(rewardPool?.campaignStartAt || rewardPool?.campaignEndAt);
+  const requestedScope = queryValue(query.leaderboard);
+  const selectedScope = isLeaderboardScope(requestedScope) ? requestedScope : hasCampaignDates ? "campaign" : "all";
+  const dateRange = leaderboardDateRange(selectedScope, rewardPool);
+  const verifiedPointGroups = dateRange === null
+    ? []
+    : await prisma.promoterPost.groupBy({
       by: ["promoterId"],
-      where: { status: "VERIFIED" },
+      where: { status: "VERIFIED", hasRequiredHashtag: true, ...(dateRange ? { createdAt: dateRange } : {}) },
       _sum: { points: true },
       _count: { _all: true },
-    }),
-  ]);
+    });
   const promoterIds = verifiedPointGroups.map((group) => group.promoterId);
   const [leaderboardPromoters, submittedPostGroups] = promoterIds.length
     ? await Promise.all([
@@ -69,6 +112,16 @@ export default async function Home() {
   const campaignWindow = rewardPool?.campaignStartAt || rewardPool?.campaignEndAt
     ? `${rewardPool.campaignStartAt ? formatDate(rewardPool.campaignStartAt) : "Open start"} → ${rewardPool.campaignEndAt ? formatDate(rewardPool.campaignEndAt) : "Open end"}`
     : "";
+  const selectedScopeLabel = leaderboardScopeLabel(selectedScope);
+  const leaderboardDescription = selectedScope === "campaign"
+    ? campaignWindow
+      ? `Verified posts submitted during ${campaignWindow}.`
+      : "Current campaign dates are not configured yet. Use all-time for the full verified leaderboard."
+    : selectedScope === "weekly"
+      ? "Verified posts submitted in the last 7 days."
+      : selectedScope === "monthly"
+        ? "Verified posts submitted in the last 30 days."
+        : "All admin-verified submitted posts.";
 
   return (
     <main className="homePage">
@@ -143,14 +196,23 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="section grid2 leaderboardPreview" aria-label="Promoter leaderboard preview">
+      <section id="leaderboard" className="section grid2 leaderboardPreview" aria-label="Promoter leaderboard preview">
         <div className="panel leaderboardPanel">
           <span className="badge">Promoter leaderboard</span>
-          <h2>Top verified point earners.</h2>
-          <p>Rankings are based only on admin-verified submitted posts. Private payout details and admin notes are never shown here.</p>
+          <h2>{selectedScopeLabel}</h2>
+          <p>{leaderboardDescription}</p>
+          <p className="notice">Only admin-verified posts with required hashtags count. Private payout details and admin notes are never shown here.</p>
+          <div className="leaderboardTabs" aria-label="Leaderboard scope">
+            {leaderboardScopes.map((scope) => (
+              <Link className={`leaderboardTab ${scope.key === selectedScope ? "active" : ""}`} href={`/?leaderboard=${scope.key}#leaderboard`} key={scope.key}>
+                {scope.label}
+              </Link>
+            ))}
+          </div>
           <div className="ctaRow">
             <Link className="button dark" href="/status">Check status</Link>
             <Link className="ghostButton" href="/promoters/apply">Apply as promoter</Link>
+            <Link className="ghostButton" href="/promoters/posts">Submit X post</Link>
           </div>
         </div>
         <div className="panel leaderboardPanel compactPanel">
@@ -165,7 +227,7 @@ export default async function Home() {
                   </div>
                   <div className="leaderboardPoints">
                     <strong>{row.points.toLocaleString()} pts</strong>
-                    <span>{row.submittedPosts.toLocaleString()} submitted / {row.verifiedPosts.toLocaleString()} verified</span>
+                    <span>{row.submittedPosts.toLocaleString()} total submitted / {row.verifiedPosts.toLocaleString()} scoped verified</span>
                   </div>
                 </div>
               ))}
@@ -173,7 +235,7 @@ export default async function Home() {
           ) : (
             <div className="emptyLeaderboard">
               <span className="status PENDING">Waiting for verified posts</span>
-              <p>Leaderboard appears after admin verifies promoter points.</p>
+              <p>{dateRange === null ? "Current campaign dates are not configured yet." : "Leaderboard appears after admin verifies promoter points in this scope."}</p>
             </div>
           )}
         </div>
