@@ -1,11 +1,63 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { promoterQuality, site, socialLinks } from "@/lib/constants";
-import { pointRules } from "@/lib/twitter";
+import { displayHandle, pointRules } from "@/lib/twitter";
 import { formatDate } from "@/lib/format";
 
+type LeaderboardRow = {
+  promoterId: number;
+  displayName: string;
+  xHandle: string;
+  points: number;
+  submittedPosts: number;
+  verifiedPosts: number;
+};
+
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
-  const rewardPool = await prisma.rewardPool.findUnique({ where: { id: 1 } });
+  const [rewardPool, verifiedPointGroups] = await Promise.all([
+    prisma.rewardPool.findUnique({ where: { id: 1 } }),
+    prisma.promoterPost.groupBy({
+      by: ["promoterId"],
+      where: { status: "VERIFIED" },
+      _sum: { points: true },
+      _count: { _all: true },
+    }),
+  ]);
+  const promoterIds = verifiedPointGroups.map((group) => group.promoterId);
+  const [leaderboardPromoters, submittedPostGroups] = promoterIds.length
+    ? await Promise.all([
+        prisma.promoter.findMany({
+          where: { id: { in: promoterIds } },
+          select: { id: true, displayName: true, xHandle: true },
+        }),
+        prisma.promoterPost.groupBy({
+          by: ["promoterId"],
+          where: { promoterId: { in: promoterIds } },
+          _count: { _all: true },
+        }),
+      ])
+    : [[], []];
+  const promotersById = new Map(leaderboardPromoters.map((promoter) => [promoter.id, promoter]));
+  const submittedPostsByPromoter = new Map(submittedPostGroups.map((group) => [group.promoterId, group._count._all]));
+  const leaderboardRows = verifiedPointGroups
+    .map((group): LeaderboardRow | null => {
+      const promoter = promotersById.get(group.promoterId);
+      const points = group._sum.points || 0;
+      if (!promoter || points <= 0) return null;
+      return {
+        promoterId: group.promoterId,
+        displayName: promoter.displayName,
+        xHandle: displayHandle(promoter.xHandle),
+        points,
+        submittedPosts: submittedPostsByPromoter.get(group.promoterId) || group._count._all,
+        verifiedPosts: group._count._all,
+      };
+    })
+    .filter((row): row is LeaderboardRow => Boolean(row))
+    .sort((a, b) => b.points - a.points || b.verifiedPosts - a.verifiedPosts || a.displayName.localeCompare(b.displayName))
+    .slice(0, 5);
   const rewardStatus = rewardPool?.active ? "Active" : "Inactive";
   const poolLabel = rewardPool?.active && rewardPool.amount ? rewardPool.amount : "Inactive";
   const poolDescription = rewardPool?.active
@@ -46,7 +98,6 @@ export default async function Home() {
             <Link className="button glowButton" href="/promoters/apply">Apply as promoter</Link>
             <Link className="button dark" href="/promoters/posts">Submit X post</Link>
             <Link className="ghostButton" href="/status">Check status</Link>
-            <Link className="ghostButton" href="/withdraw">Request withdrawal</Link>
           </div>
         </div>
 
@@ -83,12 +134,48 @@ export default async function Home() {
         <div>
           <span>Twitter/X promoter rewards</span>
           <h2>Turn campaign posts into reviewed point totals.</h2>
-          <p>Use the public forms to join, submit eligible X post URLs, check status by X handle plus wallet, and request withdrawal only when admin-reviewed reward terms are active.</p>
+          <p>Use the public forms to join, submit eligible X post URLs, and check public status. Withdrawal requests are promoter-only and only meaningful when admin-reviewed reward terms are active.</p>
         </div>
         <div className="bannerActions">
           <Link className="button purple" href="/promoters/apply">Start application</Link>
           <Link className="button dark" href="/promoters/posts">Add post</Link>
           <Link className="ghostButton" href="/status">Check status</Link>
+        </div>
+      </section>
+
+      <section className="section grid2 leaderboardPreview" aria-label="Promoter leaderboard preview">
+        <div className="panel leaderboardPanel">
+          <span className="badge">Promoter leaderboard</span>
+          <h2>Top verified point earners.</h2>
+          <p>Rankings are based only on admin-verified submitted posts. Private payout details and admin notes are never shown here.</p>
+          <div className="ctaRow">
+            <Link className="button dark" href="/status">Check status</Link>
+            <Link className="ghostButton" href="/promoters/apply">Apply as promoter</Link>
+          </div>
+        </div>
+        <div className="panel leaderboardPanel compactPanel">
+          {leaderboardRows.length ? (
+            <div className="leaderboardRows">
+              {leaderboardRows.map((row, index) => (
+                <div className="leaderboardRow" key={row.promoterId}>
+                  <strong className="leaderboardRank">#{index + 1}</strong>
+                  <div className="leaderboardIdentity">
+                    <b>{row.displayName}</b>
+                    <span>{row.xHandle}</span>
+                  </div>
+                  <div className="leaderboardPoints">
+                    <strong>{row.points.toLocaleString()} pts</strong>
+                    <span>{row.submittedPosts.toLocaleString()} submitted / {row.verifiedPosts.toLocaleString()} verified</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="emptyLeaderboard">
+              <span className="status PENDING">Waiting for verified posts</span>
+              <p>Leaderboard appears after admin verifies promoter points.</p>
+            </div>
+          )}
         </div>
       </section>
 
