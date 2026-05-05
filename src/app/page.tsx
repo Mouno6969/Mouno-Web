@@ -126,33 +126,29 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
 
   return (
     <main className="homePage">
-      <section className="promoHero" aria-labelledby="promo-title">
+      <section className="promoHero visualHero" aria-labelledby="promo-title">
+        <img className="visualHeroImage" src="/images/refundyoursol-hero-visual.png" alt="RefundYourSOL promotional portal mascot" />
+        <div className="visualHeroOverlay" />
+
+        <div className="visualHeroContent">
+          <span className="badge heroBadge">Promotional Community Portal</span>
+          <h1 id="promo-title"><span>RefundYourSOL</span><span>Promo Portal</span></h1>
+          <p className="lede heroCopy">
+            Built only for community promotion. Apply as a promoter, submit <strong>#RefundYourSol</strong> or <strong>#RYS</strong> posts, and track admin-reviewed points. Official actions stay on Refundyoursol.com.
+          </p>
+          <div className="ctaRow heroActions">
+            <a className="button glowButton" href={site.publicUrl} target="_blank" rel="noreferrer">Visit Official Website</a>
+            <Link className="button dark" href="/promoters/apply">Apply as Promoter</Link>
+            <Link className="ghostButton" href="/promoters/posts">Submit X Post</Link>
+          </div>
+        </div>
+
         <div className="heroSocialDock" aria-label="Project links">
-          <a href={site.publicUrl} target="_blank" rel="noreferrer" aria-label="Website">↗<span>Site</span></a>
+          <a href={site.publicUrl} target="_blank" rel="noreferrer" aria-label="Official website">↗<span>Site</span></a>
           <Link href="/promoters/apply" aria-label="Community">◇<span>Join</span></Link>
           <a href={socialLinks.twitter} target="_blank" rel="noreferrer" aria-label="Twitter/X">𝕏<span>X</span></a>
           <a href={socialLinks.telegram} target="_blank" rel="noreferrer" aria-label="Telegram">✈<span>TG</span></a>
           <a href={socialLinks.discord} target="_blank" rel="noreferrer" aria-label="Discord">☊<span>DC</span></a>
-        </div>
-
-        <div className="heroCenter">
-          <span className="badge heroBadge">Promotional community portal only</span>
-          <div className="orbWrap" aria-hidden="true">
-            <div className="promoOrb">
-              <span className="orbRing one" />
-              <span className="orbRing two" />
-              <span className="orbCore">+pts</span>
-            </div>
-          </div>
-          <h1 id="promo-title"><span className="headlinePlain">Promote RefundYourSOL with the community.</span><span>Official platform stays official.</span></h1>
-          <p className="lede heroCopy">
-            This site is built only for community promotion: apply as a promoter, submit <strong>#RefundYourSol</strong> or <strong>#RYS</strong> posts, and track admin-reviewed points. Official RefundYourSOL actions remain on the official website.
-          </p>
-          <div className="ctaRow heroActions">
-            <Link className="button glowButton" href="/promoters/apply">Apply as promoter</Link>
-            <Link className="button dark" href="/promoters/posts">Submit X post</Link>
-            <Link className="ghostButton" href="/status">Check status</Link>
-          </div>
         </div>
 
         <aside className="promoAdCard" aria-label="Current promoter reward pool">
