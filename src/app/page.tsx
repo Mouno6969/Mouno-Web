@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PromotionalPurposeNotice } from "@/components/PromotionalPurposeNotice";
 import { prisma } from "@/lib/prisma";
 import { promoterQuality, site, socialLinks } from "@/lib/constants";
 import { displayHandle, pointRules } from "@/lib/twitter";
@@ -135,7 +136,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
         </div>
 
         <div className="heroCenter">
-          <span className="badge heroBadge">Unofficial Twitter/X promoter rewards</span>
+          <span className="badge heroBadge">Promotional community portal only</span>
           <div className="orbWrap" aria-hidden="true">
             <div className="promoOrb">
               <span className="orbRing one" />
@@ -143,9 +144,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
               <span className="orbCore">+pts</span>
             </div>
           </div>
-          <h1 id="promo-title"><span className="headlinePlain">Promote RefundYourSOL on X.</span><span>Submit hashtag posts.</span></h1>
+          <h1 id="promo-title"><span className="headlinePlain">Promote RefundYourSOL with the community.</span><span>Official platform stays official.</span></h1>
           <p className="lede heroCopy">
-            Submit posts containing <strong>#RefundYourSol</strong> or <strong>#RYS</strong> for admin-reviewed points. SOL reward terms are inactive until admins announce a pool.
+            This site is built only for community promotion: apply as a promoter, submit <strong>#RefundYourSol</strong> or <strong>#RYS</strong> posts, and track admin-reviewed points. Official RefundYourSOL actions remain on the official website.
           </p>
           <div className="ctaRow heroActions">
             <Link className="button glowButton" href="/promoters/apply">Apply as promoter</Link>
@@ -164,6 +165,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
           <Link href="/status">Check status</Link>
         </aside>
       </section>
+
+      <PromotionalPurposeNotice className="homePurposeNotice" />
 
       <section className="homeStats" aria-label="Program facts">
         <article>

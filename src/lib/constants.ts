@@ -5,6 +5,13 @@ export const site = {
   adminUsername: process.env.ADMIN_USERNAME || "@Hazrod_m",
 };
 
+export const promotionalPurpose = {
+  label: "Built only for RefundYourSOL promotion",
+  title: "Promotional community portal only",
+  statement: "This portal supports RefundYourSOL community marketing, promoter applications, Twitter/X hashtag post submissions, admin-reviewed points, and withdrawal review. Official platform actions remain on the official RefundYourSOL website.",
+  officialCta: "Visit official RefundYourSOL website",
+} as const;
+
 export const socialLinks = {
   telegram: "https://t.me/refundyoursolbot?start=ref_8704145840",
   discord: "https://discord.gg/VJ6tqnhrdu",

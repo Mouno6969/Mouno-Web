@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PromotionalPurposeNotice } from "@/components/PromotionalPurposeNotice";
 import { submitWithdrawalRequest } from "./actions";
 
 export default async function WithdrawPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
@@ -6,6 +7,7 @@ export default async function WithdrawPage({ searchParams }: { searchParams: Pro
 
   return (
     <main className="section">
+      <PromotionalPurposeNotice compact />
       <div className="grid2">
         <section className="panel">
           <span className="badge">Twitter/X promoter payout request</span>
