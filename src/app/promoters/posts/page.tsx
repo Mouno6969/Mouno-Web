@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PromotionalPurposeNotice } from "@/components/PromotionalPurposeNotice";
 import { promoterQuality } from "@/lib/constants";
 import { pointRules } from "@/lib/twitter";
 import { submitPromoterPost } from "./actions";
@@ -8,6 +9,7 @@ export default async function PostsPage({ searchParams }: { searchParams: Promis
 
   return (
     <main className="section">
+      <PromotionalPurposeNotice compact />
       <div className="grid2">
         <section className="panel">
           <span className="badge">Submit Twitter/X activity</span>

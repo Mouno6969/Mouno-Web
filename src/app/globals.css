@@ -57,6 +57,7 @@ button, input, textarea, select { font: inherit; }
   cursor: pointer;
 }
 .nav nav a:hover, .ghostButton:hover { border-color: rgba(20, 241, 201, 0.5); color: var(--text); }
+.officialNavLink { border-color: rgba(20, 241, 201, .38) !important; color: #b8fff1 !important; background: rgba(20, 241, 201, .08) !important; }
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(320px, .85fr);
@@ -217,6 +218,27 @@ p { color: var(--muted); line-height: 1.65; }
 .promoAdCard strong { display:block; margin-top:7px; font-size: clamp(24px, 5vw, 38px); letter-spacing:-.05em; }
 .promoAdCard p { margin: 8px 0 0; max-width: 520px; }
 .promoAdCard a { flex: 0 0 auto; border:1px solid rgba(255,255,255,.18); border-radius:999px; padding: 11px 15px; background:rgba(255,255,255,.08); color:white; font-weight:800; }
+.purposeNotice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  margin: 0 0 28px;
+  padding: 22px;
+  border-radius: 28px;
+  border: 1px solid rgba(20, 241, 201, .36);
+  background:
+    radial-gradient(circle at 92% 0%, rgba(20, 241, 201, .16), transparent 14rem),
+    linear-gradient(135deg, rgba(9, 28, 44, .86), rgba(28, 18, 62, .76));
+  box-shadow: 0 22px 70px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .1);
+  backdrop-filter: blur(16px);
+}
+.purposeNotice.homePurposeNotice { margin-top: -8px; }
+.purposeNotice.compact { padding: 18px; margin-bottom: 18px; border-radius: 24px; }
+.purposeNotice span { display:block; color:#b8fff1; font-size:12px; text-transform:uppercase; letter-spacing:.16em; }
+.purposeNotice strong { display:block; margin-top: 8px; color: var(--text); font-size: clamp(20px, 3vw, 30px); letter-spacing: -.04em; }
+.purposeNotice p { margin: 8px 0 0; max-width: 800px; color: var(--soft); }
+.purposeNoticeLink { flex: 0 0 auto; display:inline-flex; align-items:center; justify-content:center; border: 1px solid rgba(20, 241, 201, .42); border-radius: 999px; padding: 11px 15px; color: #041017; background: linear-gradient(135deg, var(--accent-2), var(--accent-3)); font-weight: 800; }
 .homeStats {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -346,12 +368,14 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
 .error { border-color: rgba(251,113,133,.42); background: rgba(251,113,133,.08); color:#fecdd3; }
 .footer { border-top: 1px solid var(--line); margin-top: 50px; padding: 28px 0 42px; display:flex; justify-content:space-between; gap:18px; }
 .footer p { margin:0; font-size:13px; max-width: 520px; }
+.footer a { color: #b8fff1; font-weight: 800; }
 @media (max-width: 900px) {
   .hero, .grid2, .grid3, .homeStats { grid-template-columns: 1fr; }
   .statGrid { grid-template-columns: repeat(2, 1fr); }
   .footer, .adminHeader { flex-direction: column; }
-  .rewardBanner, .promoAdCard { flex-direction: column; align-items: stretch; }
+  .rewardBanner, .promoAdCard, .purposeNotice { flex-direction: column; align-items: stretch; }
   .bannerActions { justify-content: flex-start; }
+  .purposeNoticeLink { width: fit-content; }
 }
 @media (max-width: 600px) {
   .shell { width: min(100% - 22px, 1180px); }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PromotionalPurposeNotice } from "@/components/PromotionalPurposeNotice";
 import { prisma } from "@/lib/prisma";
 import { cleanText, formatDate, maskWallet } from "@/lib/format";
 import { displayHandle, findPromoterByXIdentifier } from "@/lib/twitter";
@@ -63,6 +64,7 @@ export default async function StatusPage({ searchParams }: { searchParams: Promi
 
   return (
     <main className="section">
+      <PromotionalPurposeNotice compact />
       <div className="grid2">
         <section className="panel">
           <span className="badge">Public promoter lookup</span>

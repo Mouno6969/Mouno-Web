@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PromotionalPurposeNotice } from "@/components/PromotionalPurposeNotice";
 import { promoterQuality } from "@/lib/constants";
 import { applyPromoter } from "./actions";
 
@@ -7,6 +8,7 @@ export default async function ApplyPage({ searchParams }: { searchParams: Promis
 
   return (
     <main className="section">
+      <PromotionalPurposeNotice compact />
       <div className="grid2">
         <section className="panel">
           <span className="badge">Twitter/X promoter application</span>
