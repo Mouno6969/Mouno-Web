@@ -4,7 +4,7 @@
   "private": true,
   "description": "Unofficial RefundYourSOL promotional community portal.",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "tsc --noEmit",
