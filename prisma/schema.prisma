@@ -48,6 +48,14 @@ model RewardPool {
   updatedAt         DateTime  @updatedAt
 }
 
+model AiProviderSetting {
+  id        Int      @id @default(autoincrement())
+  provider  String   @unique
+  apiKey    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model PromoterPost {
   id                   Int                     @id @default(autoincrement())
   promoterId           Int

@@ -13,6 +13,7 @@ This v1 site is positioned around a sharper public flow: promote RefundYourSOL o
 - No promoter authentication in v1
 - Public status lookup by X handle/profile plus SOL wallet
 - No official X API key required for the first version
+- Website-only AI Support with server-side provider fallback and admin-managed API keys
 
 ## Social links promoted
 
@@ -43,6 +44,28 @@ These are general community links, not referral-code links:
 - Withdrawal records can store a payout transaction hash for internal tracking and public proof of payment on matched status lookups.
 - Reward pools can include nullable campaign start/end dates plus nullable reward transparency terms displayed on the homepage and status page when present.
 - Admin notes are internal-only: they are visible/editable in the admin dashboard and admin CSV exports, but are not exposed on the public status page.
+- AI Support is a read-only English-only website assistant for this RefundYourSOL Promo website. It answers from website knowledge only, cannot approve or modify anything, and must not use bot-specific or private project information.
+
+## AI Support
+
+The floating AI Support widget is available globally on public website pages. It is website-only support for RefundYourSOL Promo / Mouno-Web, answers only in English regardless of user language, and is not official RefundYourSOL platform support.
+
+AI provider calls are server-side only. Provider keys can be added or updated from the protected `/admin` dashboard; saved database keys are preferred over environment keys. The admin UI shows only configured/not configured and masked previews, never full saved keys after saving. Environment keys remain optional fallback configuration for deployments or recovery.
+
+Default provider fallback priority is:
+
+```text
+groq,nvidia_llama_8b,nvidia_kimi,nvidia_qwen_7b,nvidia_mistral_small,nvidia_nemotron_nano,nvidia_llama4_scout,openrouter,gemini,huggingface,cohere,mistral,nvidia_deepseek,nvidia_gemma
+```
+
+Groq is tried first, then NVIDIA Llama 3.1 8B, then NVIDIA Kimi K2.6, then the remaining supported providers. Every provider request has a 2-second timeout and empty model responses fall through to the next configured provider. At least one admin-saved or environment API key is required for AI Support to answer.
+
+Safety boundaries:
+
+- AI Support is read-only and cannot approve applications, verify posts, change points, approve withdrawals, make payouts, access admin notes, access secrets, or guarantee live X tracking.
+- It should guide users to `/promoters/apply`, `/promoters/posts`, `/status`, `/withdraw`, `/admin/login` for admins, and the official site URL for official platform actions.
+- It must not include or rely on bot-specific information, private project details, bKash automation, Telegram Stars, crypto-selling bot flows, private keys, or seed phrases.
+- It may mention only public website social links when asked, including the public community link listed in this website.
 
 ## Free/manual X verification limitation
 
@@ -80,9 +103,44 @@ ADMIN_SESSION_SECRET="replace-with-at-least-32-random-characters"
 NEXT_PUBLIC_SITE_URL="https://refundyoursol.com"
 # Optional future authorized X API integration; not used by v1 manual-sync flow.
 X_API_BEARER_TOKEN=""
+
+# Optional server-side AI Support fallback configuration.
+# Admin-saved provider keys from /admin are preferred over these env keys.
+# At least one admin-saved or env API key is required for AI Support to answer.
+WEBSITE_AI_PROVIDER_ORDER="groq,nvidia_llama_8b,nvidia_kimi,nvidia_qwen_7b,nvidia_mistral_small,nvidia_nemotron_nano,nvidia_llama4_scout,openrouter,gemini,huggingface,cohere,mistral,nvidia_deepseek,nvidia_gemma"
+GROQ_API_KEY=""
+GROQ_MODEL="llama-3.1-8b-instant"
+NVIDIA_API_KEY=""
+NVIDIA_LLAMA_8B_API_KEY=""
+NVIDIA_LLAMA_8B_MODEL="meta/llama-3.1-8b-instruct"
+NVIDIA_KIMI_API_KEY=""
+NVIDIA_KIMI_MODEL="moonshotai/kimi-k2.6"
+NVIDIA_QWEN_7B_API_KEY=""
+NVIDIA_QWEN_7B_MODEL="qwen/qwen2-7b-instruct"
+NVIDIA_MISTRAL_SMALL_API_KEY=""
+NVIDIA_MISTRAL_SMALL_MODEL="mistralai/mistral-small-24b-instruct"
+NVIDIA_NEMOTRON_NANO_API_KEY=""
+NVIDIA_NEMOTRON_NANO_MODEL="nvidia/llama-3.1-nemotron-nano-8b-v1"
+NVIDIA_LLAMA4_SCOUT_API_KEY=""
+NVIDIA_LLAMA4_SCOUT_MODEL="meta/llama-4-scout-17b-16e-instruct"
+NVIDIA_DEEPSEEK_API_KEY=""
+NVIDIA_DEEPSEEK_MODEL="deepseek-ai/deepseek-v4-pro"
+NVIDIA_GEMMA_API_KEY=""
+NVIDIA_GEMMA_MODEL="google/gemma-4-31b-it"
+OPENROUTER_API_KEY=""
+OPENROUTER_MODEL="meta-llama/llama-3.1-8b-instruct:free"
+GEMINI_API_KEY=""
+GEMINI_MODEL="gemini-1.5-flash"
+HUGGINGFACE_API_KEY=""
+HF_TOKEN=""
+HUGGINGFACE_MODEL="HuggingFaceH4/zephyr-7b-beta"
+COHERE_API_KEY=""
+COHERE_MODEL="command-r"
+MISTRAL_API_KEY=""
+MISTRAL_MODEL="mistral-small-latest"
 ```
 
-Do not commit `.env`, production passwords, private keys, seed phrases, or wallet secrets.
+Do not commit `.env`, production passwords, AI provider keys, private keys, seed phrases, or wallet secrets.
 
 ## Local development
 
@@ -207,3 +265,4 @@ sudo certbot --nginx -d refundyoursol.com -d www.refundyoursol.com
 - Promoters do not log in. They use their Twitter/X profile URL or handle for post submissions, withdrawals, and public `/status` lookup with a SOL wallet factor.
 - Admin notes must remain internal-only and should not be rendered on public pages.
 - Never ask users for private keys or seed phrases.
+- AI provider keys saved in admin settings must remain server-side only and must not be included in public responses, CSV exports, logs, or client code.
