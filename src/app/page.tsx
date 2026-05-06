@@ -128,6 +128,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<Rec
     <main className="homePage">
       <section className="promoHero visualHero" aria-labelledby="promo-title">
         <img className="visualHeroImage" src="/images/refundyoursol-hero-visual.png" alt="RefundYourSOL promotional portal mascot" />
+        <div className="visualHeroHairWind" aria-hidden="true">
+          <span className="hairWisp hairWispOne" />
+          <span className="hairWisp hairWispTwo" />
+          <span className="hairWisp hairWispThree" />
+        </div>
+        <div className="visualHeroLightSweep" aria-hidden="true" />
         <div className="visualHeroOverlay" />
 
         <div className="visualHeroContent">

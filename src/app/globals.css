@@ -140,6 +140,21 @@ p { color: var(--muted); line-height: 1.65; }
   background: #050917;
   box-shadow: 0 28px 90px rgba(0, 0, 0, .4), inset 0 1px rgba(255, 255, 255, .08);
 }
+.visualHero::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: 2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(20, 241, 201, .32) 0 1px, transparent 1.8px) 71% 24% / 190px 150px,
+    radial-gradient(circle, rgba(246, 196, 83, .24) 0 1px, transparent 1.7px) 88% 46% / 230px 180px,
+    radial-gradient(circle, rgba(184, 255, 241, .22) 0 1px, transparent 1.6px) 55% 70% / 260px 210px;
+  filter: blur(.15px);
+  opacity: .32;
+  mix-blend-mode: screen;
+  animation: visualParticleDrift 12s linear infinite;
+}
 .visualHeroImage {
   position: absolute;
   inset: 0;
@@ -148,6 +163,104 @@ p { color: var(--muted); line-height: 1.65; }
   object-fit: cover;
   object-position: center;
   z-index: 0;
+  transform: scale(1.016) translate3d(0, 0, 0);
+  transform-origin: 64% 36%;
+  backface-visibility: hidden;
+  will-change: transform;
+  animation: visualHeroBreathe 8.5s cubic-bezier(.45, 0, .2, 1) infinite alternate;
+}
+.visualHeroHairWind,
+.visualHeroLightSweep {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+.visualHeroHairWind {
+  top: clamp(60px, 11vw, 128px);
+  right: clamp(56px, 10vw, 150px);
+  width: min(39vw, 430px);
+  height: min(27vw, 286px);
+  opacity: .82;
+  filter: drop-shadow(0 0 16px rgba(20, 241, 201, .18));
+  mix-blend-mode: screen;
+  mask-image: radial-gradient(ellipse at 66% 46%, black 0 42%, rgba(0, 0, 0, .72) 58%, transparent 78%);
+}
+.visualHeroHairWind::before,
+.visualHeroHairWind::after,
+.hairWisp {
+  position: absolute;
+  display: block;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent 0%, rgba(246, 196, 83, .18) 18%, rgba(20, 241, 201, .56) 52%, rgba(184, 255, 241, .22) 73%, transparent 100%);
+  filter: blur(.75px);
+  transform-origin: 100% 50%;
+  will-change: transform, opacity;
+}
+.visualHeroHairWind::before,
+.visualHeroHairWind::after {
+  content: "";
+  right: 5%;
+  width: 78%;
+}
+.visualHeroHairWind::before {
+  top: 24%;
+  animation: hairWindRibbon 6.8s ease-in-out infinite alternate;
+}
+.visualHeroHairWind::after {
+  top: 47%;
+  width: 64%;
+  opacity: .56;
+  background: linear-gradient(90deg, transparent 0%, rgba(246, 196, 83, .34) 32%, rgba(184, 255, 241, .18) 68%, transparent 100%);
+  animation: hairWindRibbon 7.6s ease-in-out -1.4s infinite alternate-reverse;
+}
+.hairWisp {
+  right: 8%;
+  width: 72%;
+  opacity: .58;
+}
+.hairWisp::after {
+  content: "";
+  position: absolute;
+  inset: -7px 8% auto 22%;
+  height: 13px;
+  border-radius: 50%;
+  border-top: 1px solid rgba(246, 196, 83, .23);
+  filter: blur(.2px);
+}
+.hairWispOne {
+  top: 33%;
+  transform: rotate(-9deg) translate3d(-3%, 0, 0) scaleX(.74);
+  animation: hairWindWisp 5.2s ease-in-out -.6s infinite alternate;
+}
+.hairWispTwo {
+  top: 58%;
+  width: 62%;
+  opacity: .44;
+  background: linear-gradient(90deg, transparent 0%, rgba(20, 241, 201, .26) 28%, rgba(246, 196, 83, .38) 58%, transparent 100%);
+  animation: hairWindWisp 6.1s ease-in-out -2.1s infinite alternate-reverse;
+}
+.hairWispThree {
+  top: 72%;
+  right: 18%;
+  width: 50%;
+  opacity: .34;
+  animation: hairWindWisp 7.2s ease-in-out -3s infinite alternate;
+}
+.visualHeroLightSweep {
+  top: 18%;
+  right: 8%;
+  width: min(34vw, 360px);
+  height: min(30vw, 300px);
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 55% 38%, rgba(20, 241, 201, .16), transparent 42%),
+    linear-gradient(108deg, transparent 24%, rgba(184, 255, 241, .13) 46%, transparent 62%);
+  filter: blur(12px);
+  opacity: .42;
+  mix-blend-mode: screen;
+  transform: translate3d(0, 0, 0) rotate(-10deg);
+  animation: visualLensGlow 9.5s ease-in-out infinite alternate;
 }
 .visualHeroOverlay {
   position: absolute;
@@ -159,7 +272,7 @@ p { color: var(--muted); line-height: 1.65; }
 }
 .visualHeroContent {
   position: relative;
-  z-index: 2;
+  z-index: 4;
   width: min(100%, 680px);
   padding: clamp(18px, 4vw, 54px) 0 clamp(150px, 15vw, 190px);
 }
@@ -183,7 +296,7 @@ p { color: var(--muted); line-height: 1.65; }
 .visualHero .heroActions { justify-content: flex-start; }
 .visualHero .heroSocialDock {
   position: absolute;
-  z-index: 3;
+  z-index: 5;
   top: 24px;
   right: 24px;
   width: auto;
@@ -191,7 +304,7 @@ p { color: var(--muted); line-height: 1.65; }
 }
 .visualHero .promoAdCard {
   position: absolute;
-  z-index: 2;
+  z-index: 4;
   left: 28px;
   right: 28px;
   bottom: 28px;
@@ -485,6 +598,31 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
 .aiSupportForm textarea { width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--line); border-radius: 16px; color: var(--text); background: rgba(4, 8, 18, .72); padding: 12px; outline: none; }
 .aiSupportForm textarea:focus { border-color: rgba(20, 241, 201, .6); }
 .aiSupportForm button:disabled, .aiSupportToggle:disabled { cursor: not-allowed; opacity: .65; }
+@keyframes visualHeroBreathe {
+  0% { transform: scale(1.016) translate3d(-.12%, -.18%, 0); }
+  48% { transform: scale(1.021) translate3d(.18%, -.42%, 0); }
+  100% { transform: scale(1.018) translate3d(.08%, .22%, 0); }
+}
+@keyframes hairWindRibbon {
+  0% { opacity: .28; transform: translate3d(3%, -3%, 0) rotate(-8deg) scaleX(.62) skewX(-8deg); }
+  42% { opacity: .68; transform: translate3d(-3%, 1%, 0) rotate(-4deg) scaleX(.86) skewX(-3deg); }
+  100% { opacity: .38; transform: translate3d(-7%, 4%, 0) rotate(-12deg) scaleX(.72) skewX(-12deg); }
+}
+@keyframes hairWindWisp {
+  0% { opacity: .2; transform: translate3d(4%, -4%, 0) rotate(-13deg) scaleX(.54); }
+  38% { opacity: .62; transform: translate3d(-2%, 1%, 0) rotate(-7deg) scaleX(.88); }
+  100% { opacity: .3; transform: translate3d(-8%, 4%, 0) rotate(-15deg) scaleX(.66); }
+}
+@keyframes visualLensGlow {
+  0% { opacity: .24; transform: translate3d(5%, -4%, 0) rotate(-13deg) scale(.94); }
+  46% { opacity: .5; transform: translate3d(-2%, 1%, 0) rotate(-8deg) scale(1.04); }
+  100% { opacity: .31; transform: translate3d(-7%, 4%, 0) rotate(-16deg) scale(.98); }
+}
+@keyframes visualParticleDrift {
+  0% { transform: translate3d(0, 0, 0); opacity: .18; }
+  50% { opacity: .36; }
+  100% { transform: translate3d(-3.5%, -2.5%, 0); opacity: .2; }
+}
 @media (max-width: 900px) {
   .hero, .grid2, .grid3, .homeStats { grid-template-columns: 1fr; }
   .statGrid { grid-template-columns: repeat(2, 1fr); }
@@ -493,6 +631,8 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
   .visualHero { min-height: 760px; padding: 22px; }
   .visualHeroOverlay { background: linear-gradient(180deg, rgba(4, 7, 18, .98) 0%, rgba(4, 7, 18, .78) 48%, rgba(4, 7, 18, .24) 100%); }
   .visualHeroImage { object-position: 62% center; }
+  .visualHeroHairWind { top: 22%; right: 4%; width: min(58vw, 390px); height: 260px; opacity: .58; }
+  .visualHeroLightSweep { top: 25%; right: 0; width: min(52vw, 330px); height: 280px; opacity: .28; }
   .visualHeroContent { padding-top: 76px; padding-bottom: 260px; }
   .visualHero .heroSocialDock { left: 22px; right: 22px; justify-content: flex-start; }
   .visualHero .promoAdCard { left: 22px; right: 22px; bottom: 22px; }
@@ -507,6 +647,9 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
   .promoHero { min-height: auto; padding-bottom: 26px; }
   .visualHero { min-height: 820px; padding: 18px; }
   .visualHeroImage { object-position: 64% center; }
+  .visualHero::before { opacity: .18; }
+  .visualHeroHairWind { top: 31%; right: -7%; width: 68vw; height: 220px; opacity: .44; }
+  .visualHeroLightSweep { top: 34%; right: -10%; width: 62vw; height: 230px; opacity: .2; }
   .visualHeroContent { padding-top: 68px; padding-bottom: 300px; }
   .visualHero h1 { font-size: clamp(40px, 12vw, 58px); letter-spacing: -0.06em; }
   .visualHero .heroCopy { font-size: 16px; }
@@ -523,4 +666,19 @@ th { color: var(--text); font-size: 12px; letter-spacing: .12em; text-transform:
   .orbWrap { width: min(72vw, 224px); margin-top: 24px; }
   .aiSupport { right: 11px; bottom: 11px; }
   .aiSupportPanel { width: calc(100vw - 22px); max-height: calc(100vh - 92px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .visualHeroImage,
+  .visualHero::before,
+  .visualHeroHairWind::before,
+  .visualHeroHairWind::after,
+  .hairWisp,
+  .visualHeroLightSweep {
+    animation: none;
+  }
+  .visualHeroImage { transform: scale(1.012); }
+  .visualHero::before,
+  .visualHeroHairWind,
+  .visualHeroLightSweep { opacity: .16; }
 }
