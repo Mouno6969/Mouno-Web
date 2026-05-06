@@ -54,11 +54,19 @@ export function AiSupportWidget() {
           <p className="aiSupportNotice">Read-only website support for RefundYourSOL Promo. Not official platform support.</p>
           <div className="aiSupportMessages">
             {messages.map((message, index) => (
-              <div className={`aiSupportMessage ${message.role}`} key={`${message.role}-${index}`}>
-                {message.text}
+              <div className={`aiSupportMessageRow ${message.role}`} key={`${message.role}-${index}`}>
+                {message.role === "assistant" ? <img className="aiSupportAvatar" src="/images/refundyoursol-promo-icon.png" alt="" aria-hidden="true" /> : null}
+                <div className={`aiSupportMessage ${message.role}`}>
+                  {message.text}
+                </div>
               </div>
             ))}
-            {pending ? <div className="aiSupportMessage assistant">Thinking…</div> : null}
+            {pending ? (
+              <div className="aiSupportMessageRow assistant">
+                <img className="aiSupportAvatar" src="/images/refundyoursol-promo-icon.png" alt="" aria-hidden="true" />
+                <div className="aiSupportMessage assistant">Thinking…</div>
+              </div>
+            ) : null}
           </div>
           <form className="aiSupportForm" onSubmit={submit}>
             <label htmlFor="ai-support-message">Ask a website question</label>
