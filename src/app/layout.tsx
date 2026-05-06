@@ -7,6 +7,10 @@ import { site } from "@/lib/constants";
 export const metadata: Metadata = {
   title: `${site.name} | Twitter/X Promoter Rewards`,
   description: "Promotional community portal for RefundYourSOL Twitter/X promoter submissions, admin-reviewed points, and payout review. Not a replacement for the official platform.",
+  icons: {
+    icon: "/images/refundyoursol-promo-icon.png",
+    apple: "/images/refundyoursol-promo-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -16,11 +20,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="shell">
           <header className="nav">
             <Link href="/" className="logo" aria-label="RefundYourSol Promo home">
-              <span className="logoMark">R</span>
-              <span>
-                <strong>RefundYourSol</strong>
-                <small>Promo</small>
-              </span>
+              <img className="logoImage" src="/images/refundyoursol-promo-logo.png" alt="RefundYourSOL Promo" />
             </Link>
             <nav>
               <Link href="/promoters/apply">Apply</Link>
