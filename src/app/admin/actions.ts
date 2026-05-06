@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { clearAdminSession, requireAdmin } from "@/lib/auth";
+import { adminAiProviderKeyFields } from "@/lib/aiSupport";
 import { cleanText, parseOptionalDate } from "@/lib/format";
 import { calculatePoints, calculateVerified, containsRequiredHashtag, extractXHandle, normalizeHandle, normalizeXProfileUrl, parseCount, recalculatePostCommentTotals } from "@/lib/twitter";
 import type { PostStatus, WithdrawalStatus } from "@prisma/client";
@@ -34,6 +35,25 @@ export async function updateRewardPool(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin");
   revalidatePath("/status");
+}
+
+export async function updateAiProviderSettings(formData: FormData) {
+  await requireAdmin();
+  for (const field of adminAiProviderKeyFields) {
+    const apiKey = cleanText(formData.get(`aiKey__${field.name}`), 4000);
+    const shouldClear = formData.get(`aiClear__${field.name}`) === "on";
+    if (shouldClear) {
+      await prisma.aiProviderSetting.deleteMany({ where: { provider: field.name } });
+      continue;
+    }
+    if (!apiKey) continue;
+    await prisma.aiProviderSetting.upsert({
+      where: { provider: field.name },
+      create: { provider: field.name, apiKey },
+      update: { apiKey },
+    });
+  }
+  revalidatePath("/admin");
 }
 
 export async function createPromoter(formData: FormData) {

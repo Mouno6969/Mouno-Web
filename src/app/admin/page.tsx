@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { formatDate, formatDateInput } from "@/lib/format";
 import { promoterQuality } from "@/lib/constants";
 import { displayHandle, pointRules } from "@/lib/twitter";
-import { createPromoter, logoutAdmin, updatePost, updatePromoter, updateRewardPool, updateWithdrawal, upsertCommentEngagement } from "./actions";
+import { getAiProviderKeyStatuses, getWebsiteAiProviderOrder } from "@/lib/aiSupport";
+import { createPromoter, logoutAdmin, updateAiProviderSettings, updatePost, updatePromoter, updateRewardPool, updateWithdrawal, upsertCommentEngagement } from "./actions";
 
 function queryValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] || "" : value || "";
@@ -27,11 +28,12 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
   const promoterSort = queryValue(query.promoterSort);
   const postFilter = queryValue(query.postFilter);
   const withdrawalFilter = queryValue(query.withdrawalFilter);
-  const [rewardPool, promoters, allPosts, allWithdrawals] = await Promise.all([
+  const [rewardPool, promoters, allPosts, allWithdrawals, aiProviderStatuses] = await Promise.all([
     prisma.rewardPool.findUnique({ where: { id: 1 } }),
     prisma.promoter.findMany({ orderBy: { createdAt: "desc" }, include: { posts: true, _count: { select: { posts: true, withdrawalRequests: true } } } }),
     prisma.promoterPost.findMany({ orderBy: { createdAt: "desc" }, include: { promoter: true, commentEngagements: { orderBy: { updatedAt: "desc" }, take: 6 } } }),
     prisma.withdrawalRequest.findMany({ orderBy: { createdAt: "desc" }, include: { promoter: true } }),
+    getAiProviderKeyStatuses(),
   ]);
 
   const verifiedPromoters = promoters.filter((promoter) => promoter.verified).length;
@@ -103,6 +105,29 @@ export default async function AdminDashboard({ searchParams }: { searchParams: P
           </div>
           <p className="notice">No official X API key is configured. Counts are manually imported or ready for future authorized API sync.</p>
           <p className="notice">Manual review criteria: {promoterQuality.criteria.join(" ")}</p>
+        </div>
+      </section>
+
+      <section className="section">
+        <div className="panel">
+          <span className="badge">Server-side AI Support</span>
+          <h2>AI provider keys</h2>
+          <p className="notice">Saved keys are used only on the server for the website AI Support widget. Full keys are never shown after saving, never sent to public pages, and env keys remain fallback.</p>
+          <p>Fallback order: <span className="copyBox">{getWebsiteAiProviderOrder().join(",")}</span></p>
+          <form className="form" action={updateAiProviderSettings}>
+            <div className="grid2">
+              {aiProviderStatuses.map((provider) => (
+                <div className="metric" key={provider.name}>
+                  <span>{provider.label}</span>
+                  <strong>{provider.configured ? "Configured" : "Not configured"}</strong>
+                  <p>{provider.source}{provider.masked ? ` · ${provider.masked}` : ""}</p>
+                  <label className="field">New key <input name={`aiKey__${provider.name}`} type="password" autoComplete="off" placeholder="Leave blank to keep current key" /></label>
+                  <label className="field"><span><input type="checkbox" name={`aiClear__${provider.name}`} /> Clear saved admin key</span></label>
+                </div>
+              ))}
+            </div>
+            <button className="button" type="submit">Save AI provider keys</button>
+          </form>
         </div>
       </section>
 

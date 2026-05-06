@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
+import { AiSupportWidget } from "@/components/AiSupportWidget";
 import { site } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <p><a href={site.publicUrl} target="_blank" rel="noreferrer">Visit the official RefundYourSOL website</a> for official platform actions. Rewards and payouts here are manually reviewed and subject to admin approval.</p>
           </footer>
         </div>
+        <AiSupportWidget />
       </body>
     </html>
   );
